@@ -3,6 +3,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { VideoPlayer } from "@/components/VideoPlayer";
-import { Search, Video, FileText, Eye, Play } from "lucide-react";
+import { Search, Video, FileText, Eye, Play, Subtitles, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import apiClient from "@/integrations/supabase/client";
 
@@ -26,6 +27,8 @@ interface Tutorial {
   duration: string;
   uploadedByName: string;
   views: number;
+  captionsUrl: string | null; // ✅ NEW
+  captionsStatus: string; // ✅ NEW
   createdAt: string;
 }
 
@@ -90,6 +93,35 @@ const StudentTutorials = () => {
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
   };
 
+  // ✅ NEW: Get caption status badge
+  const getCaptionStatusBadge = (status: string) => {
+    switch (status) {
+      case "completed":
+        return (
+          <Badge className="bg-green-500 text-white text-xs">
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Captions
+          </Badge>
+        );
+      case "generating":
+        return (
+          <Badge className="bg-yellow-500 text-white text-xs">
+            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+            Generating...
+          </Badge>
+        );
+      case "failed":
+        return (
+          <Badge variant="destructive" className="text-xs">
+            <XCircle className="w-3 h-3 mr-1" />
+            Failed
+          </Badge>
+        );
+      default:
+        return null;
+    }
+  };
+
   // Group tutorials by course
   const tutorialsByCourse = filteredTutorials.reduce((acc, tutorial) => {
     if (!acc[tutorial.course]) {
@@ -111,7 +143,7 @@ const StudentTutorials = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="p-6 border-border/50 bg-card/50">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-cyan-glow flex items-center justify-center">
@@ -148,6 +180,20 @@ const StudentTutorials = () => {
                   {tutorials.reduce((sum, t) => sum + t.views, 0)}
                 </p>
                 <p className="text-sm text-muted-foreground">Total Views</p>
+              </div>
+            </div>
+          </Card>
+          {/* ✅ NEW: Captions Stats Card */}
+          <Card className="p-6 border-border/50 bg-card/50">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                <Subtitles className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">
+                  {tutorials.filter((t) => t.captionsStatus === "completed").length}
+                </p>
+                <p className="text-sm text-muted-foreground">With Captions</p>
               </div>
             </div>
           </Card>
@@ -206,9 +252,13 @@ const StudentTutorials = () => {
                           )}
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-xl font-bold text-foreground mb-1">
-                            {tutorial.title}
-                          </h3>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="text-xl font-bold text-foreground">
+                              {tutorial.title}
+                            </h3>
+                            {/* ✅ NEW: Caption Status Badge */}
+                            {tutorial.type === "video" && getCaptionStatusBadge(tutorial.captionsStatus)}
+                          </div>
                           <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
                             <span>{formatFileSize(tutorial.fileSize)}</span>
                             {tutorial.duration && <span>{tutorial.duration}</span>}
@@ -252,10 +302,29 @@ const StudentTutorials = () => {
             {selectedTutorial && (
               <div className="space-y-4 mt-4">
                 {selectedTutorial.type === "video" ? (
-                  <VideoPlayer
-                    src={`http://localhost:5000${selectedTutorial.filePath}`}
-                    title={selectedTutorial.title}
-                  />
+                  <div className="w-full aspect-video bg-black rounded-lg overflow-hidden">
+                    <video
+                      controls
+                      className="w-full h-full"
+                      crossOrigin="anonymous"
+                    >
+                      <source
+                        src={`http://localhost:5000${selectedTutorial.filePath}`}
+                        type="video/mp4"
+                      />
+                      {/* ✅ NEW: Caption Track */}
+                      {selectedTutorial.captionsUrl && selectedTutorial.captionsStatus === "completed" && (
+                        <track
+                          label="English"
+                          kind="subtitles"
+                          srcLang="en"
+                          src={`http://localhost:5000${selectedTutorial.captionsUrl}`}
+                          default
+                        />
+                      )}
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
                 ) : (
                   <div className="w-full h-[600px]">
                     <iframe
@@ -266,7 +335,7 @@ const StudentTutorials = () => {
                   </div>
                 )}
                 <div className="space-y-2">
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
                     <span className="px-2 py-1 rounded bg-primary/10 text-primary">
                       {selectedTutorial.course}
                     </span>
@@ -277,6 +346,8 @@ const StudentTutorials = () => {
                       <Eye className="w-4 h-4" />
                       {selectedTutorial.views} views
                     </span>
+                    {/* ✅ NEW: Show caption status in dialog */}
+                    {selectedTutorial.type === "video" && getCaptionStatusBadge(selectedTutorial.captionsStatus)}
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {selectedTutorial.description}

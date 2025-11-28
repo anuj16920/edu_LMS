@@ -3,6 +3,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
@@ -18,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Search, Video, FileText, Eye, Edit, Trash2, Upload } from "lucide-react";
+import { Plus, Search, Video, FileText, Eye, Edit, Trash2, Upload, Subtitles, CheckCircle, XCircle, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import apiClient from "@/integrations/supabase/client";
 
@@ -34,6 +35,8 @@ interface Tutorial {
   duration: string;
   uploadedByName: string;
   views: number;
+  captionsUrl: string | null; // ✅ NEW
+  captionsStatus: string; // ✅ NEW
   createdAt: string;
 }
 
@@ -114,7 +117,14 @@ const FacultyTutorials = () => {
       });
 
       console.log("✅ Tutorial uploaded:", response.data);
-      toast.success("Tutorial uploaded successfully!");
+      
+      // ✅ Show different message based on type
+      if (formData.type === "video") {
+        toast.success("Video uploaded! Captions are being generated automatically...");
+      } else {
+        toast.success("Tutorial uploaded successfully!");
+      }
+      
       setIsAddDialogOpen(false);
 
       // Reset form
@@ -133,6 +143,23 @@ const FacultyTutorials = () => {
       toast.error(error.response?.data?.error || "Failed to upload tutorial");
     } finally {
       setUploading(false);
+    }
+  };
+
+  // ✅ NEW: Regenerate captions
+  const handleRegenerateCaptions = async (tutorialId: string) => {
+    try {
+      toast.info("Regenerating captions...");
+      await apiClient.post(`/tutorials/${tutorialId}/captions/regenerate`);
+      toast.success("Caption regeneration started!");
+      
+      // Refresh after a delay
+      setTimeout(() => {
+        fetchTutorials();
+      }, 2000);
+    } catch (error: any) {
+      console.error("❌ Error regenerating captions:", error);
+      toast.error(error.response?.data?.error || "Failed to regenerate captions");
     }
   };
 
@@ -163,6 +190,35 @@ const FacultyTutorials = () => {
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + " " + sizes[i];
+  };
+
+  // ✅ NEW: Get caption status badge
+  const getCaptionStatusBadge = (status: string) => {
+    switch (status) {
+      case "completed":
+        return (
+          <Badge className="bg-green-500 text-white text-xs">
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Captions Ready
+          </Badge>
+        );
+      case "generating":
+        return (
+          <Badge className="bg-yellow-500 text-white text-xs">
+            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+            Generating...
+          </Badge>
+        );
+      case "failed":
+        return (
+          <Badge variant="destructive" className="text-xs">
+            <XCircle className="w-3 h-3 mr-1" />
+            Failed
+          </Badge>
+        );
+      default:
+        return null;
+    }
   };
 
   return (
@@ -257,6 +313,13 @@ const FacultyTutorials = () => {
                       <p className="text-xs text-muted-foreground">
                         Video (MP4, MOV) or PDF files
                       </p>
+                      {/* ✅ NEW: Caption info */}
+                      {formData.type === "video" && (
+                        <p className="text-xs text-green-500 mt-2 flex items-center justify-center gap-1">
+                          <Subtitles className="w-3 h-3" />
+                          Captions will be generated automatically
+                        </p>
+                      )}
                     </label>
                   </div>
                 </div>
@@ -273,7 +336,7 @@ const FacultyTutorials = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="p-6 border-border/50 bg-card/50">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-cyan-glow flex items-center justify-center">
@@ -310,6 +373,20 @@ const FacultyTutorials = () => {
                   {tutorials.reduce((sum, t) => sum + t.views, 0)}
                 </p>
                 <p className="text-sm text-muted-foreground">Total Views</p>
+              </div>
+            </div>
+          </Card>
+          {/* ✅ NEW: Captions Stats Card */}
+          <Card className="p-6 border-border/50 bg-card/50">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                <Subtitles className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">
+                  {tutorials.filter((t) => t.captionsStatus === "completed").length}
+                </p>
+                <p className="text-sm text-muted-foreground">With Captions</p>
               </div>
             </div>
           </Card>
@@ -363,10 +440,14 @@ const FacultyTutorials = () => {
                     )}
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-foreground mb-1">
-                      {tutorial.title}
-                    </h3>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-xl font-bold text-foreground">
+                        {tutorial.title}
+                      </h3>
+                      {/* ✅ NEW: Caption Status Badge */}
+                      {tutorial.type === "video" && getCaptionStatusBadge(tutorial.captionsStatus)}
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2 flex-wrap">
                       <span className="px-2 py-1 rounded bg-primary/10 text-primary">
                         {tutorial.course}
                       </span>
@@ -385,6 +466,18 @@ const FacultyTutorials = () => {
                     </p>
                   </div>
                   <div className="flex gap-2">
+                    {/* ✅ NEW: Regenerate Captions Button */}
+                    {tutorial.type === "video" && tutorial.captionsStatus === "failed" && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleRegenerateCaptions(tutorial._id)}
+                        className="border-yellow-500 hover:bg-yellow-500/10 hover:text-yellow-500"
+                        title="Regenerate captions"
+                      >
+                        <RefreshCw className="w-4 h-4" />
+                      </Button>
+                    )}
                     <Button
                       variant="outline"
                       size="icon"

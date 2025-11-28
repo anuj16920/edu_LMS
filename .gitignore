@@ -9,25 +9,32 @@ backend/.env
 frontend/.env
 .env.local
 .env.production
+*.env
 
 # Build files
 frontend/dist/
 frontend/build/
 backend/dist/
+build/
+dist/
 
 # Logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+logs/
 
 # OS files
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
 
-# Uploads (user-uploaded files)
+# Uploads (user-uploaded files - DON'T PUSH TO GITHUB)
 backend/uploads/*
 !backend/uploads/.gitkeep
 
@@ -36,6 +43,7 @@ coverage/
 .nyc_output/
 
 # Misc
-*.swp
-*.swo
-*~
+*.orig
+.cache/
+temp/
+tmp/

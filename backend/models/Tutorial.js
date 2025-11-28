@@ -47,6 +47,24 @@ const tutorialSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  // ✅ NEW: Caption-related fields
+  captionsUrl: {
+    type: String,
+    default: null
+  },
+  captionsStatus: {
+    type: String,
+    enum: ['not_started', 'generating', 'completed', 'failed'],
+    default: 'not_started'
+  },
+  captionsGeneratedAt: {
+    type: Date,
+    default: null
+  },
+  transcriptText: {
+    type: String,
+    default: ''
+  },
   createdAt: {
     type: Date,
     default: Date.now
