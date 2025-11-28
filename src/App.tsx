@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/integrations/supabase/auth";
 import Login from "./pages/Login";
-import LoginSuccess from "./pages/LoginSuccess"; // ✅ NEW IMPORT
+import LoginSuccess from "./pages/LoginSuccess";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import FacultyDashboard from "./pages/faculty/FacultyDashboard";
 import StudentDashboard from "./pages/student/StudentDashboard";
@@ -41,15 +41,21 @@ import StudentCalendar from "./pages/student/StudentCalendar";
 import StudentChat from "./pages/student/StudentChat";
 import StudentSettings from "./pages/student/StudentSettings";
 
+// ✅ Alumni pages
+import AlumniDashboard from "./pages/alumni/AlumniDashboard";
+import AlumniProfile from "./pages/alumni/AlumniProfile";
+import AlumniDirectory from "./pages/alumni/AlumniDirectory";
+import AlumniCommunities from "./pages/alumni/AlumniCommunities"; // ✅ NEW
+
 const queryClient = new QueryClient();
 
-// Protected Route Component
+// ✅ Protected Route Component
 const ProtectedRoute = ({ 
   children, 
   allowedRole 
 }: { 
   children: React.ReactNode; 
-  allowedRole: 'admin' | 'faculty' | 'student';
+  allowedRole: 'admin' | 'faculty' | 'student' | 'alumni';
 }) => {
   const { user, loading } = useAuth();
 
@@ -98,7 +104,6 @@ const AppRoutes = () => {
         element={user ? <Navigate to={`/${user.role}/dashboard`} replace /> : <Login />} 
       />
       
-      {/* ✅ NEW ROUTE FOR GOOGLE OAUTH CALLBACK */}
       <Route 
         path="/login/success" 
         element={<LoginSuccess />} 
@@ -322,6 +327,40 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRole="student">
             <StudentSettings />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* ✅ Alumni Routes */}
+      <Route 
+        path="/alumni/dashboard" 
+        element={
+          <ProtectedRoute allowedRole="alumni">
+            <AlumniDashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/alumni/profile" 
+        element={
+          <ProtectedRoute allowedRole="alumni">
+            <AlumniProfile />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/alumni/directory" 
+        element={
+          <ProtectedRoute allowedRole="alumni">
+            <AlumniDirectory />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/alumni/communities" 
+        element={
+          <ProtectedRoute allowedRole="alumni">
+            <AlumniCommunities />
           </ProtectedRoute>
         } 
       />

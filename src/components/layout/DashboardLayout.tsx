@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 
-type UserRole = "admin" | "faculty" | "student";
+type UserRole = "admin" | "faculty" | "student" | "alumni"; // ✅ Alumni added
 
 interface DashboardLayoutProps {
   children: ReactNode;

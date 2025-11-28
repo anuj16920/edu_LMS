@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { GraduationCap, UserCog, Users, BookOpen } from "lucide-react";
+import { GraduationCap, UserCog, Users, BookOpen, Award } from "lucide-react"; // ✅ Added Award icon
 import { toast } from "sonner";
 import { useAuth } from "@/integrations/supabase/auth";
-import apiClient from "@/integrations/supabase/client"; // ✅ ADD THIS IMPORT
+import apiClient from "@/integrations/supabase/client";
 
-type UserRole = "admin" | "faculty" | "student";
+type UserRole = "admin" | "faculty" | "student" | "alumni"; // ✅ Added alumni
 
 const Login = () => {
   const navigate = useNavigate();
@@ -27,6 +27,7 @@ const Login = () => {
     }
   }, [user, loading, navigate]);
 
+  // ✅ UPDATED: Added Alumni role card
   const roles = [
     {
       type: "admin" as UserRole,
@@ -48,6 +49,13 @@ const Login = () => {
       icon: Users,
       description: "Learn and grow",
       gradient: "from-cyan-glow to-accent",
+    },
+    {
+      type: "alumni" as UserRole,
+      title: "Alumni",
+      icon: Award,
+      description: "Connect and mentor",
+      gradient: "from-purple-500 to-pink-500",
     },
   ];
 
@@ -88,7 +96,6 @@ const Login = () => {
     }
   };
 
-  // ✅ FIXED: Google Auth with role parameter using apiClient
   const handleGoogleAuth = async () => {
     if (!selectedRole) {
       toast.error("Please select a role first");
@@ -98,7 +105,6 @@ const Login = () => {
     try {
       console.log('🔐 Initiating Google login with role:', selectedRole);
       
-      // ✅ Use apiClient (baseURL already has /api)
       const { data } = await apiClient.get(`/auth/google/url?role=${selectedRole}`);
 
       if (data.url) {
@@ -113,7 +119,6 @@ const Login = () => {
     }
   };
 
-  // Show loading state
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-premium-black via-background to-deep-navy">
@@ -136,9 +141,9 @@ const Login = () => {
           <p className="text-muted-foreground text-lg">Premium Learning Management System</p>
         </div>
 
-        {/* Role Selection */}
+        {/* Role Selection - Now with 4 cards */}
         {!selectedRole ? (
-          <div className="grid md:grid-cols-3 gap-6 mb-8 animate-slide-up">
+          <div className="grid md:grid-cols-4 gap-6 mb-8 animate-slide-up">
             {roles.map((role, idx) => {
               const Icon = role.icon;
               return (

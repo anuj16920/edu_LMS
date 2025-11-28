@@ -25,8 +25,9 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Please provide all required fields' });
     }
 
-    if (!role || !['admin', 'faculty', 'student'].includes(role)) {
-      return res.status(400).json({ error: 'Invalid role. Must be admin, faculty, or student' });
+    // ✅ UPDATED: Add alumni to valid roles
+    if (!role || !['admin', 'faculty', 'student', 'alumni'].includes(role)) {
+      return res.status(400).json({ error: 'Invalid role. Must be admin, faculty, student, or alumni' });
     }
 
     const existingUser = await User.findOne({ email });
@@ -113,10 +114,10 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// ✅ UPDATED: Google Auth - Get Google Login URL (with role parameter)
+// Google Auth - Get Google Login URL (with role parameter)
 router.get('/google/url', (req, res) => {
   try {
-    const { role } = req.query; // ✅ Get role from query
+    const { role } = req.query;
     console.log('🔗 Generating Google auth URL for role:', role || 'student');
 
     const authUrl = googleOAuthClient.generateAuthUrl({
@@ -124,7 +125,7 @@ router.get('/google/url', (req, res) => {
       prompt: 'consent',
       scope: ['profile', 'email'],
       redirect_uri: BACKEND_REDIRECT_URI,
-      state: role || 'student' // ✅ Pass role in state parameter
+      state: role || 'student'
     });
 
     res.json({ url: authUrl });
@@ -134,18 +135,23 @@ router.get('/google/url', (req, res) => {
   }
 });
 
-// ✅ UPDATED: Google Auth - Callback (extract role from state)
+// Google Auth - Callback (extract role from state)
 router.get('/google/callback', async (req, res) => {
   try {
-    const { code, state } = req.query; // ✅ Get both code and state (role)
+    const { code, state } = req.query;
     
     if (!code) {
       return res.status(400).json({ error: 'No authorization code received' });
     }
 
-    const selectedRole = state || 'student'; // ✅ Get role from state or default to student
+    const selectedRole = state || 'student';
     console.log('📥 Google callback received, code:', String(code).substring(0, 20) + '...');
     console.log('👤 Selected role:', selectedRole);
+
+    // ✅ VALIDATE: Make sure selected role is valid (including alumni)
+    if (!['admin', 'faculty', 'student', 'alumni'].includes(selectedRole)) {
+      return res.status(400).json({ error: 'Invalid role selected' });
+    }
 
     // Exchange code for tokens
     const { tokens } = await googleOAuthClient.getToken({
@@ -168,12 +174,12 @@ router.get('/google/callback', async (req, res) => {
     });
 
     if (!user) {
-      // ✅ New Google user - use selected role from frontend
+      // New Google user - use selected role from frontend
       user = new User({
         googleId: payload.sub,
         email: payload.email,
         fullName: payload.name || payload.email.split('@')[0],
-        role: selectedRole, // ✅ Use selected role instead of hardcoded 'student'
+        role: selectedRole,
         avatarUrl: payload.picture,
         isVerified: true
       });

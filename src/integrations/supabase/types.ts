@@ -76,7 +76,8 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "faculty" | "student"
+      // ✅ Add alumni here
+      app_role: "admin" | "faculty" | "student" | "alumni"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -201,10 +202,11 @@ export type CompositeTypes<
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
+// ✅ Add alumni also to this constants array for IDE autocompletion and consistency
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "faculty", "student"],
+      app_role: ["admin", "faculty", "student", "alumni"],
     },
   },
 } as const

@@ -29,7 +29,9 @@ app.use('/api/tutorials', require('./routes/tutorials'));
 app.use('/api/tests', require('./routes/tests'));
 app.use('/api/assignments', require('./routes/assignments'));
 app.use('/api/chat', require('./routes/chat'));
-app.use('/api/chatbot', require('./routes/chatbot')); // ✅ AI CHATBOT ROUTE ADDED
+app.use('/api/chatbot', require('./routes/chatbot'));
+app.use('/api/alumni', require('./routes/alumni')); // ✅ NEW: Alumni routes
+app.use('/api/communities', require('./routes/communities')); // ✅ NEW: Communities routes
 
 // Test Route
 app.get('/', (req, res) => {
@@ -45,7 +47,9 @@ app.get('/', (req, res) => {
       tests: '/api/tests (GET, POST, PUT, DELETE)',
       assignments: '/api/assignments (GET, POST, PUT, DELETE)',
       chat: '/api/chat (GET, POST, DELETE)',
-      chatbot: '/api/chatbot/ask (POST), /api/chatbot/suggestions (GET)' // ✅ ADDED
+      chatbot: '/api/chatbot/ask (POST), /api/chatbot/suggestions (GET)',
+      alumni: '/api/alumni (GET, POST, PUT), /api/alumni/profile/:id (GET, PUT)', // ✅ NEW
+      communities: '/api/communities (GET, POST), /api/communities/:id (GET), /api/communities/:id/join (POST), /api/communities/:id/leave (POST), /api/communities/:id/message (POST)' // ✅ NEW
     }
   });
 });
@@ -80,5 +84,7 @@ app.listen(PORT, () => {
   console.log(`📋 Assignment routes: http://localhost:${PORT}/api/assignments`);
   console.log(`💬 Chat routes: http://localhost:${PORT}/api/chat`);
   console.log(`🤖 Chatbot routes: http://localhost:${PORT}/api/chatbot`);
+  console.log(`🎓 Alumni routes: http://localhost:${PORT}/api/alumni`); // ✅ NEW
+  console.log(`👥 Communities routes: http://localhost:${PORT}/api/communities`); // ✅ NEW
   console.log(`🔑 Google auth URL: http://localhost:${PORT}/api/auth/google/url`);
 });

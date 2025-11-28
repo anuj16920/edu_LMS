@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['admin', 'faculty', 'student'],
+    enum: ['admin', 'faculty', 'student', 'alumni'], // ✅ Added alumni
     required: true,
     default: 'student'
   },
@@ -60,7 +60,7 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Course'
   }],
-  googleId: { // Added for Google OAuth
+  googleId: {
     type: String,
     unique: true,
     sparse: true
@@ -69,6 +69,53 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  
+  // ✅ NEW: Alumni-specific fields
+  phoneNumber: {
+    type: String,
+    default: ''
+  },
+  graduationYear: {
+    type: String,
+    default: ''
+  },
+  currentCompany: {
+    type: String,
+    default: ''
+  },
+  designation: {
+    type: String,
+    default: ''
+  },
+  location: {
+    type: String,
+    default: ''
+  },
+  linkedIn: {
+    type: String,
+    default: ''
+  },
+  bio: {
+    type: String,
+    default: ''
+  },
+  skills: {
+    type: [String],
+    default: []
+  },
+  previousCompanies: {
+    type: [String],
+    default: []
+  },
+  openToMentorship: {
+    type: Boolean,
+    default: false
+  },
+  openToReferrals: {
+    type: Boolean,
+    default: false
+  },
+  
   createdAt: {
     type: Date,
     default: Date.now

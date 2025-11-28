@@ -6,7 +6,7 @@ interface User {
   email: string;
   fullName?: string;
   full_name?: string;
-  role?: 'admin' | 'faculty' | 'student';
+  role?: 'admin' | 'faculty' | 'student'|'alumni';
 }
 
 interface Session {

@@ -10,11 +10,12 @@ import {
   LogOut,
   GraduationCap,
   ClipboardList,
-  Bot
+  Bot,
+  Award // ✅ NEW: For Alumni icon
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "@/integrations/supabase/auth"; // ✅ ADDED THIS
+import { useAuth } from "@/integrations/supabase/auth";
 import {
   Sidebar,
   SidebarContent,
@@ -30,7 +31,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-type UserRole = "admin" | "faculty" | "student";
+type UserRole = "admin" | "faculty" | "student" | "alumni";
 
 interface AppSidebarProps {
   role: UserRole;
@@ -64,21 +65,26 @@ const navigationConfig = {
     { title: "Chat", icon: MessageSquare, url: "/student/chat" },
     { title: "AI Chatbot", icon: Bot, url: "/student/chatbot" },
   ],
+  // ✅ NEW: Alumni Navigation
+  alumni: [
+    { title: "Dashboard", icon: LayoutDashboard, url: "/alumni/dashboard" },
+    { title: "Alumni Directory", icon: Users, url: "/alumni/directory" },
+    { title: "Communities", icon: MessageSquare, url: "/alumni/communities" },
+  ],
 };
 
 export function AppSidebar({ role }: AppSidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { state } = useSidebar();
-  const { signOut } = useAuth(); // ✅ ADDED THIS
+  const { signOut } = useAuth();
   const items = navigationConfig[role];
 
-  // ✅ UPDATED THIS FUNCTION
   const handleLogout = async () => {
     console.log('🖱️ LOGOUT BUTTON CLICKED IN SIDEBAR!');
     try {
       toast.success("Logged out successfully");
-      await signOut(); // ✅ THIS IS THE KEY LINE!
+      await signOut();
     } catch (error) {
       console.error('❌ Logout error:', error);
       // Force logout anyway if signOut fails
