@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['admin', 'faculty', 'student', 'alumni'], // ✅ Added alumni
+    enum: ['admin', 'faculty', 'student', 'alumni'],
     required: true,
     default: 'student'
   },
@@ -69,8 +69,22 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  
-  // ✅ NEW: Alumni-specific fields
+
+  // ✅ NEW: Ban fields
+  isBanned: {
+    type: Boolean,
+    default: false
+  },
+  banReason: {
+    type: String,
+    default: '',
+    trim: true
+  },
+  bannedAt: {
+    type: Date
+  },
+
+  // ✅ Alumni-specific fields
   phoneNumber: {
     type: String,
     default: ''
@@ -115,7 +129,7 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  
+
   createdAt: {
     type: Date,
     default: Date.now

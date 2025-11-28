@@ -11,8 +11,9 @@ import {
   GraduationCap,
   ClipboardList,
   Bot,
-  Award,
-  HandshakeIcon
+  HandshakeIcon,
+  FileStack,        // ✅ NEW (if not available, replace with FileText)
+  ShieldAlert       // ✅ NEW for User Management
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -38,20 +39,23 @@ interface AppSidebarProps {
   role: UserRole;
 }
 
-const navigationConfig = {
+const navigationConfig: Record<UserRole, { title: string; icon: any; url: string }[]> = {
   admin: [
     { title: "Dashboard", icon: LayoutDashboard, url: "/admin/dashboard" },
     { title: "Faculty", icon: Users, url: "/admin/faculty" },
     { title: "Students", icon: GraduationCap, url: "/admin/students" },
     { title: "Tutorials", icon: BookOpen, url: "/admin/tutorials" },
+    { title: "Study Materials", icon: FileStack, url: "/admin/materials" },        // ✅ NEW
     { title: "Tests", icon: FileText, url: "/admin/tests" },
     { title: "Assignments", icon: ClipboardList, url: "/admin/assignments" },
     { title: "Calendar", icon: Calendar, url: "/admin/calendar" },
     { title: "Chat", icon: MessageSquare, url: "/admin/chat" },
+    { title: "User Management", icon: ShieldAlert, url: "/admin/users" },         // ✅ NEW (ban/unban)
   ],
   faculty: [
     { title: "Dashboard", icon: LayoutDashboard, url: "/faculty/dashboard" },
     { title: "Tutorials", icon: BookOpen, url: "/faculty/tutorials" },
+    { title: "Study Materials", icon: FileStack, url: "/faculty/materials" },     // ✅ NEW
     { title: "Tests", icon: FileText, url: "/faculty/tests" },
     { title: "Assignments", icon: ClipboardList, url: "/faculty/assignments" },
     { title: "Calendar", icon: Calendar, url: "/faculty/calendar" },
@@ -60,6 +64,7 @@ const navigationConfig = {
   student: [
     { title: "Dashboard", icon: LayoutDashboard, url: "/student/dashboard" },
     { title: "Tutorials", icon: BookOpen, url: "/student/tutorials" },
+    { title: "Study Materials", icon: FileStack, url: "/student/materials" },     // ✅ NEW
     { title: "Tests", icon: FileText, url: "/student/tests" },
     { title: "Assignments", icon: ClipboardList, url: "/student/assignments" },
     { title: "Calendar", icon: Calendar, url: "/student/calendar" },
@@ -67,7 +72,7 @@ const navigationConfig = {
     { title: "AI Chatbot", icon: Bot, url: "/student/chatbot" },
     { title: "Alumni Directory", icon: Users, url: "/student/alumni-directory" },
     { title: "My Mentorship", icon: HandshakeIcon, url: "/student/mentorship-requests" },
-    { title: "Communities", icon: MessageSquare, url: "/student/communities" }, // ✅ NEW
+    { title: "Communities", icon: MessageSquare, url: "/student/communities" },
   ],
   alumni: [
     { title: "Dashboard", icon: LayoutDashboard, url: "/alumni/dashboard" },
@@ -85,13 +90,12 @@ export function AppSidebar({ role }: AppSidebarProps) {
   const items = navigationConfig[role];
 
   const handleLogout = async () => {
-    console.log('🖱️ LOGOUT BUTTON CLICKED IN SIDEBAR!');
+    console.log("🖱️ LOGOUT BUTTON CLICKED IN SIDEBAR!");
     try {
       toast.success("Logged out successfully");
       await signOut();
     } catch (error) {
-      console.error('❌ Logout error:', error);
-      // Force logout anyway if signOut fails
+      console.error("❌ Logout error:", error);
       localStorage.clear();
       navigate("/login");
     }
@@ -118,7 +122,9 @@ export function AppSidebar({ role }: AppSidebarProps) {
         </div>
 
         <SidebarGroup>
-          <SidebarGroupLabel className={isCollapsed ? "sr-only" : ""}>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className={isCollapsed ? "sr-only" : ""}>
+            Navigation
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => {
@@ -136,7 +142,9 @@ export function AppSidebar({ role }: AppSidebarProps) {
                         }`}
                       >
                         <Icon className="w-5 h-5 flex-shrink-0" />
-                        {!isCollapsed && <span className="font-medium">{item.title}</span>}
+                        {!isCollapsed && (
+                          <span className="font-medium">{item.title}</span>
+                        )}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

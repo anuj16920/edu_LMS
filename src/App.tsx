@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/integrations/supabase/auth";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import Login from "./pages/Login";
 import LoginSuccess from "./pages/LoginSuccess";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -21,6 +22,8 @@ import AdminCalendar from "./pages/admin/AdminCalendar";
 import AdminChat from "./pages/admin/AdminChat";
 import AdminProfile from "./pages/admin/AdminProfile";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminMaterialManagement from "./pages/admin/AdminMaterialManagement"; // ✅ NEW
+import AdminUserManagement from "./pages/admin/AdminUserManagement";           // ✅ NEW
 
 // Faculty pages
 import FacultyTutorials from "./pages/faculty/FacultyTutorials";
@@ -30,6 +33,7 @@ import FacultyAssignments from "./pages/faculty/FacultyAssignments";
 import FacultyCalendar from "./pages/faculty/FacultyCalendar";
 import FacultyChat from "./pages/faculty/FacultyChat";
 import FacultySettings from "./pages/faculty/FacultySettings";
+import FacultyMaterials from "./pages/faculty/FacultyMaterials";              // ✅ NEW
 
 // Student pages
 import StudentTutorials from "./pages/student/StudentTutorials";
@@ -42,7 +46,8 @@ import StudentChat from "./pages/student/StudentChat";
 import StudentSettings from "./pages/student/StudentSettings";
 import StudentAlumniDirectory from "./pages/student/StudentAlumniDirectory";
 import StudentMentorshipRequests from "./pages/student/StudentMentorshipRequests";
-import StudentCommunities from "./pages/student/StudentCommunities"; // ✅ NEW
+import StudentCommunities from "./pages/student/StudentCommunities";
+import StudentMaterials from "./pages/student/StudentMaterials";              // ✅ NEW
 
 // Alumni pages
 import AlumniDashboard from "./pages/alumni/AlumniDashboard";
@@ -54,12 +59,12 @@ import AlumniMentorshipRequests from "./pages/alumni/AlumniMentorshipRequests";
 const queryClient = new QueryClient();
 
 // Protected Route Component
-const ProtectedRoute = ({ 
-  children, 
-  allowedRole 
-}: { 
-  children: React.ReactNode; 
-  allowedRole: 'admin' | 'faculty' | 'student' | 'alumni';
+const ProtectedRoute = ({
+  children,
+  allowedRole,
+}: {
+  children: React.ReactNode;
+  allowedRole: "admin" | "faculty" | "student" | "alumni";
 }) => {
   const { user, loading } = useAuth();
 
@@ -97,309 +102,340 @@ const AppRoutes = () => {
   return (
     <Routes>
       {/* Root and Login Routes */}
-      <Route 
-        path="/" 
+      <Route
+        path="/"
         element={
-          user ? <Navigate to={`/${user.role}/dashboard`} replace /> : <Navigate to="/login" replace />
-        } 
+          user ? (
+            <Navigate to={`/${user.role}/dashboard`} replace />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
       />
-      <Route 
-        path="/login" 
-        element={user ? <Navigate to={`/${user.role}/dashboard`} replace /> : <Login />} 
+      <Route
+        path="/login"
+        element={user ? <Navigate to={`/${user.role}/dashboard`} replace /> : <Login />}
       />
-      
-      <Route 
-        path="/login/success" 
-        element={<LoginSuccess />} 
-      />
-      
+      <Route path="/login/success" element={<LoginSuccess />} />
+
       {/* Admin Routes */}
-      <Route 
-        path="/admin/dashboard" 
+      <Route
+        path="/admin/dashboard"
         element={
           <ProtectedRoute allowedRole="admin">
             <AdminDashboard />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/admin/faculty" 
+      <Route
+        path="/admin/faculty"
         element={
           <ProtectedRoute allowedRole="admin">
             <FacultyManagement />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/admin/students" 
+      <Route
+        path="/admin/students"
         element={
           <ProtectedRoute allowedRole="admin">
             <StudentManagement />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/admin/tutorials" 
+      <Route
+        path="/admin/tutorials"
         element={
           <ProtectedRoute allowedRole="admin">
             <TutorialManagement />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/admin/tests" 
+      <Route
+        path="/admin/materials"           // ✅ NEW
+        element={
+          <ProtectedRoute allowedRole="admin">
+            <AdminMaterialManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/tests"
         element={
           <ProtectedRoute allowedRole="admin">
             <TestManagement />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/admin/assignments" 
+      <Route
+        path="/admin/assignments"
         element={
           <ProtectedRoute allowedRole="admin">
             <AssignmentManagement />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/admin/calendar" 
+      <Route
+        path="/admin/calendar"
         element={
           <ProtectedRoute allowedRole="admin">
             <AdminCalendar />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/admin/chat" 
+      <Route
+        path="/admin/chat"
         element={
           <ProtectedRoute allowedRole="admin">
             <AdminChat />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/admin/profile" 
+      <Route
+        path="/admin/profile"
         element={
           <ProtectedRoute allowedRole="admin">
             <AdminProfile />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/admin/settings" 
+      <Route
+        path="/admin/settings"
         element={
           <ProtectedRoute allowedRole="admin">
             <AdminSettings />
           </ProtectedRoute>
-        } 
+        }
+      />
+      <Route
+        path="/admin/users"              // ✅ NEW
+        element={
+          <ProtectedRoute allowedRole="admin">
+            <AdminUserManagement />
+          </ProtectedRoute>
+        }
       />
 
       {/* Faculty Routes */}
-      <Route 
-        path="/faculty/dashboard" 
+      <Route
+        path="/faculty/dashboard"
         element={
           <ProtectedRoute allowedRole="faculty">
             <FacultyDashboard />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/faculty/tutorials" 
+      <Route
+        path="/faculty/tutorials"
         element={
           <ProtectedRoute allowedRole="faculty">
             <FacultyTutorials />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/faculty/tests" 
+      <Route
+        path="/faculty/materials"        // ✅ NEW
+        element={
+          <ProtectedRoute allowedRole="faculty">
+            <FacultyMaterials />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/faculty/tests"
         element={
           <ProtectedRoute allowedRole="faculty">
             <FacultyTests />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/faculty/assignments" 
+      <Route
+        path="/faculty/assignments"
         element={
           <ProtectedRoute allowedRole="faculty">
             <FacultyAssignments />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/faculty/calendar" 
+      <Route
+        path="/faculty/calendar"
         element={
           <ProtectedRoute allowedRole="faculty">
             <FacultyCalendar />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/faculty/chat" 
+      <Route
+        path="/faculty/chat"
         element={
           <ProtectedRoute allowedRole="faculty">
             <FacultyChat />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/faculty/profile" 
+      <Route
+        path="/faculty/profile"
         element={
           <ProtectedRoute allowedRole="faculty">
             <FacultyProfile />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/faculty/settings" 
+      <Route
+        path="/faculty/settings"
         element={
           <ProtectedRoute allowedRole="faculty">
             <FacultySettings />
           </ProtectedRoute>
-        } 
+        }
       />
 
       {/* Student Routes */}
-      <Route 
-        path="/student/dashboard" 
+      <Route
+        path="/student/dashboard"
         element={
           <ProtectedRoute allowedRole="student">
             <StudentDashboard />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/student/tutorials" 
+      <Route
+        path="/student/tutorials"
         element={
           <ProtectedRoute allowedRole="student">
             <StudentTutorials />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/student/tests" 
+      <Route
+        path="/student/materials"        // ✅ NEW
+        element={
+          <ProtectedRoute allowedRole="student">
+            <StudentMaterials />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/tests"
         element={
           <ProtectedRoute allowedRole="student">
             <StudentTests />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/student/assignments" 
+      <Route
+        path="/student/assignments"
         element={
           <ProtectedRoute allowedRole="student">
             <StudentAssignments />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/student/calendar" 
+      <Route
+        path="/student/calendar"
         element={
           <ProtectedRoute allowedRole="student">
             <StudentCalendar />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/student/chat" 
+      <Route
+        path="/student/chat"
         element={
           <ProtectedRoute allowedRole="student">
             <StudentChat />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/student/chatbot" 
+      <Route
+        path="/student/chatbot"
         element={
           <ProtectedRoute allowedRole="student">
             <StudentChatbot />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/student/profile" 
+      <Route
+        path="/student/profile"
         element={
           <ProtectedRoute allowedRole="student">
             <StudentProfile />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/student/settings" 
+      <Route
+        path="/student/settings"
         element={
           <ProtectedRoute allowedRole="student">
             <StudentSettings />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/student/alumni-directory" 
+      <Route
+        path="/student/alumni-directory"
         element={
           <ProtectedRoute allowedRole="student">
             <StudentAlumniDirectory />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/student/mentorship-requests" 
+      <Route
+        path="/student/mentorship-requests"
         element={
           <ProtectedRoute allowedRole="student">
             <StudentMentorshipRequests />
           </ProtectedRoute>
-        } 
+        }
       />
-      {/* ✅ NEW: Student Communities Route */}
-      <Route 
-        path="/student/communities" 
+      <Route
+        path="/student/communities"
         element={
           <ProtectedRoute allowedRole="student">
             <StudentCommunities />
           </ProtectedRoute>
-        } 
+        }
       />
 
       {/* Alumni Routes */}
-      <Route 
-        path="/alumni/dashboard" 
+      <Route
+        path="/alumni/dashboard"
         element={
           <ProtectedRoute allowedRole="alumni">
             <AlumniDashboard />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/alumni/profile" 
+      <Route
+        path="/alumni/profile"
         element={
           <ProtectedRoute allowedRole="alumni">
             <AlumniProfile />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/alumni/directory" 
+      <Route
+        path="/alumni/directory"
         element={
           <ProtectedRoute allowedRole="alumni">
             <AlumniDirectory />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/alumni/communities" 
+      <Route
+        path="/alumni/communities"
         element={
           <ProtectedRoute allowedRole="alumni">
             <AlumniCommunities />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/alumni/mentorship-requests" 
+      <Route
+        path="/alumni/mentorship-requests"
         element={
           <ProtectedRoute allowedRole="alumni">
             <AlumniMentorshipRequests />
           </ProtectedRoute>
-        } 
+        }
       />
 
       <Route path="*" element={<NotFound />} />
@@ -409,15 +445,17 @@ const AppRoutes = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

@@ -1,8 +1,9 @@
 import { ReactNode } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
+import { ThemeToggle } from "@/components/ThemeToggle"; // ✅ NEW
 
-type UserRole = "admin" | "faculty" | "student" | "alumni"; // ✅ Alumni added
+type UserRole = "admin" | "faculty" | "student" | "alumni";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -39,6 +40,8 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
                 <p className="text-sm text-muted-foreground hidden md:block">
                   Welcome back! 👋
                 </p>
+                {/* ✅ NEW: Theme Toggle Button */}
+                <ThemeToggle />
               </div>
             </div>
           </header>
