@@ -22,8 +22,8 @@ import AdminCalendar from "./pages/admin/AdminCalendar";
 import AdminChat from "./pages/admin/AdminChat";
 import AdminProfile from "./pages/admin/AdminProfile";
 import AdminSettings from "./pages/admin/AdminSettings";
-import AdminMaterialManagement from "./pages/admin/AdminMaterialManagement"; // ✅ NEW
-import AdminUserManagement from "./pages/admin/AdminUserManagement";           // ✅ NEW
+import AdminMaterialManagement from "./pages/admin/AdminMaterialManagement";
+import AdminUserManagement from "./pages/admin/AdminUserManagement";
 
 // Faculty pages
 import FacultyTutorials from "./pages/faculty/FacultyTutorials";
@@ -33,7 +33,7 @@ import FacultyAssignments from "./pages/faculty/FacultyAssignments";
 import FacultyCalendar from "./pages/faculty/FacultyCalendar";
 import FacultyChat from "./pages/faculty/FacultyChat";
 import FacultySettings from "./pages/faculty/FacultySettings";
-import FacultyMaterials from "./pages/faculty/FacultyMaterials";              // ✅ NEW
+import FacultyMaterials from "./pages/faculty/FacultyMaterials";
 
 // Student pages
 import StudentTutorials from "./pages/student/StudentTutorials";
@@ -47,7 +47,7 @@ import StudentSettings from "./pages/student/StudentSettings";
 import StudentAlumniDirectory from "./pages/student/StudentAlumniDirectory";
 import StudentMentorshipRequests from "./pages/student/StudentMentorshipRequests";
 import StudentCommunities from "./pages/student/StudentCommunities";
-import StudentMaterials from "./pages/student/StudentMaterials";              // ✅ NEW
+import StudentMaterials from "./pages/student/StudentMaterials";
 
 // Alumni pages
 import AlumniDashboard from "./pages/alumni/AlumniDashboard";
@@ -152,7 +152,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/admin/materials"           // ✅ NEW
+        path="/admin/materials"
         element={
           <ProtectedRoute allowedRole="admin">
             <AdminMaterialManagement />
@@ -208,7 +208,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/admin/users"              // ✅ NEW
+        path="/admin/users"
         element={
           <ProtectedRoute allowedRole="admin">
             <AdminUserManagement />
@@ -234,7 +234,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/faculty/materials"        // ✅ NEW
+        path="/faculty/materials"
         element={
           <ProtectedRoute allowedRole="faculty">
             <FacultyMaterials />
@@ -308,7 +308,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/student/materials"        // ✅ NEW
+        path="/student/materials"
         element={
           <ProtectedRoute allowedRole="student">
             <StudentMaterials />

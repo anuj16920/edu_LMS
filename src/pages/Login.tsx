@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { GraduationCap, UserCog, Users, BookOpen, Award } from "lucide-react"; // ✅ Added Award icon
+import { GraduationCap, UserCog, Users, BookOpen, Award } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/integrations/supabase/auth";
 import apiClient from "@/integrations/supabase/client";
 
-type UserRole = "admin" | "faculty" | "student" | "alumni"; // ✅ Added alumni
+type UserRole = "admin" | "faculty" | "student" | "alumni";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -22,12 +22,11 @@ const Login = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (user && !loading) {
-      const userRole = user.role || 'student';
+      const userRole = user.role || "student";
       navigate(`/${userRole}/dashboard`);
     }
   }, [user, loading, navigate]);
 
-  // ✅ UPDATED: Added Alumni role card
   const roles = [
     {
       type: "admin" as UserRole,
@@ -74,24 +73,24 @@ const Login = () => {
         toast.error("Please enter your full name");
         return;
       }
-      
+
       const { error } = await signUp(email, password, fullName, selectedRole);
 
       if (error) {
-        toast.error(typeof error === 'string' ? error : 'Sign up failed');
+        toast.error(typeof error === "string" ? error : "Sign up failed");
         return;
       }
-      
+
       toast.success("Account created successfully!");
       navigate(`/${selectedRole}/dashboard`);
     } else {
       const { error } = await signIn(email, password);
-      
+
       if (error) {
-        toast.error(typeof error === 'string' ? error : 'Login failed');
+        toast.error(typeof error === "string" ? error : "Login failed");
         return;
       }
-      
+
       toast.success("Welcome back!");
     }
   };
@@ -103,18 +102,18 @@ const Login = () => {
     }
 
     try {
-      console.log('🔐 Initiating Google login with role:', selectedRole);
-      
+      console.log("🔐 Initiating Google login with role:", selectedRole);
+
       const { data } = await apiClient.get(`/auth/google/url?role=${selectedRole}`);
 
       if (data.url) {
-        console.log('✅ Got Google auth URL, redirecting...');
+        console.log("✅ Got Google auth URL, redirecting...");
         window.location.href = data.url;
       } else {
         toast.error("Failed to get Google login URL");
       }
     } catch (error: any) {
-      console.error('❌ Google auth error:', error);
+      console.error("❌ Google auth error:", error);
       toast.error("Google authentication failed to start");
     }
   };
@@ -130,18 +129,26 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-premium-black via-background to-deep-navy p-4">
       <div className="w-full max-w-6xl">
-        {/* Header */}
+        {/* Header with MLRIT logo */}
         <div className="text-center mb-12 animate-fade-in">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <GraduationCap className="w-12 h-12 text-primary" />
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-primary via-cyan-glow to-accent bg-clip-text text-transparent">
-              EduPortal
-            </h1>
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <img
+              src="/mlrit-logo.png"
+              alt="MLRIT"
+              className="h-12 w-auto drop-shadow-lg"
+            />
+            <div className="text-left">
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary via-cyan-glow to-accent bg-clip-text text-transparent">
+                MLRIT EduPortal
+              </h1>
+              <p className="text-xs md:text-sm text-muted-foreground">
+                Premium Learning Management System
+              </p>
+            </div>
           </div>
-          <p className="text-muted-foreground text-lg">Premium Learning Management System</p>
         </div>
 
-        {/* Role Selection - Now with 4 cards */}
+        {/* Role Selection */}
         {!selectedRole ? (
           <div className="grid md:grid-cols-4 gap-6 mb-8 animate-slide-up">
             {roles.map((role, idx) => {
@@ -153,11 +160,17 @@ const Login = () => {
                   style={{ animationDelay: `${idx * 0.1}s` }}
                   className="p-8 cursor-pointer hover-lift border-border/50 bg-card/50 backdrop-blur-sm group animate-scale-in"
                 >
-                  <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${role.gradient} p-4 group-hover:animate-glow transition-all duration-300`}>
+                  <div
+                    className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${role.gradient} p-4 group-hover:animate-glow transition-all duration-300`}
+                  >
                     <Icon className="w-full h-full text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-center mb-2 text-foreground">{role.title}</h3>
-                  <p className="text-muted-foreground text-center">{role.description}</p>
+                  <h3 className="text-2xl font-bold text-center mb-2 text-foreground">
+                    {role.title}
+                  </h3>
+                  <p className="text-muted-foreground text-center">
+                    {role.description}
+                  </p>
                 </Card>
               );
             })}
@@ -176,7 +189,8 @@ const Login = () => {
                 ← Change Role
               </Button>
               <h2 className="text-3xl font-bold text-center mb-2 bg-gradient-to-r from-primary to-cyan-glow bg-clip-text text-transparent animate-shimmer">
-                {roles.find(r => r.type === selectedRole)?.title} {isSignUp ? 'Sign Up' : 'Login'}
+                {roles.find((r) => r.type === selectedRole)?.title}{" "}
+                {isSignUp ? "Sign Up" : "Login"}
               </h2>
             </div>
 
@@ -217,15 +231,17 @@ const Login = () => {
                 onClick={handleAuth}
                 className="w-full bg-gradient-to-r from-primary to-cyan-glow hover:shadow-neon transition-all duration-300 hover-lift"
               >
-                {isSignUp ? 'Sign Up' : 'Sign In'}
+                {isSignUp ? "Sign Up" : "Sign In"}
               </Button>
-              
+
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t border-border/50" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                  <span className="bg-card px-2 text-muted-foreground">
+                    Or continue with
+                  </span>
                 </div>
               </div>
 
@@ -257,7 +273,7 @@ const Login = () => {
 
               <p className="text-center text-sm text-muted-foreground">
                 {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
-                <button 
+                <button
                   onClick={() => setIsSignUp(!isSignUp)}
                   className="text-primary hover:underline"
                 >
