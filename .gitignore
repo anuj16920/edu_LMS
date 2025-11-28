@@ -1,0 +1,19 @@
+﻿# Root ignore
+node_modules/
+
+frontend/node_modules/
+backend/node_modules/
+
+dist/
+build/
+frontend/dist/
+backend/dist/
+backend/uploads/
+
+
+.env
+.env.local
+frontend/.env
+backend/.env
+
+.DS_Store

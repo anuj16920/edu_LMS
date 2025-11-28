@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Login - Loading...</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    body { 
+      margin: 0; 
+      padding: 40px; 
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    .container {
+      text-align: center;
+      color: white;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 40px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .spinner {
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top: 3px solid #00d4ff;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="spinner"></div>
+    <h2>Completing Google Login...</h2>
+    <p>Redirecting you to dashboard</p>
+  </div>
+
+  <script>
+    // Listen for URL params from backend redirect
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    const userStr = urlParams.get('user');
+
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(decodeURIComponent(userStr));
+        
+        // Send success message to parent window (popup opener)
+        window.opener.postMessage({
+          type: 'GOOGLE_AUTH_SUCCESS',
+          payload: { token, user }
+        }, '*');
+        
+        // Close this popup
+        setTimeout(() => {
+          window.close();
+        }, 1000);
+      } catch (e) {
+        console.error('Failed to parse user data:', e);
+        window.opener.postMessage({
+          type: 'GOOGLE_AUTH_ERROR',
+          payload: { error: 'Failed to process login' }
+        }, '*');
+        window.close();
+      }
+    } else {
+      // Fallback - redirect to main login
+      window.location.href = '/';
+    }
+  </script>
+</body>
+</html>
