@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { GraduationCap, UserCog, Users, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/integrations/supabase/auth";
+import apiClient from "@/integrations/supabase/client"; // ✅ ADD THIS IMPORT
 
 type UserRole = "admin" | "faculty" | "student";
 
@@ -87,7 +88,7 @@ const Login = () => {
     }
   };
 
-  // ✅ UPDATED: Google Auth with role parameter
+  // ✅ FIXED: Google Auth with role parameter using apiClient
   const handleGoogleAuth = async () => {
     if (!selectedRole) {
       toast.error("Please select a role first");
@@ -97,20 +98,16 @@ const Login = () => {
     try {
       console.log('🔐 Initiating Google login with role:', selectedRole);
       
-      // ✅ Pass selected role to backend
-      const googleLoginUrl = `${import.meta.env.VITE_API_URL}/api/auth/google/url?role=${selectedRole}`;
-      
-      const response = await fetch(googleLoginUrl);
-      const data = await response.json();
+      // ✅ Use apiClient (baseURL already has /api)
+      const { data } = await apiClient.get(`/auth/google/url?role=${selectedRole}`);
 
       if (data.url) {
         console.log('✅ Got Google auth URL, redirecting...');
-        // Direct redirect - no popup needed since we have LoginSuccess handler
         window.location.href = data.url;
       } else {
         toast.error("Failed to get Google login URL");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Google auth error:', error);
       toast.error("Google authentication failed to start");
     }
