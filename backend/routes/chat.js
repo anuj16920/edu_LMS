@@ -11,14 +11,10 @@ const fs = require('fs');
 router.get('/groups', auth, async (req, res) => {
   try {
     console.log('📥 Fetching groups for user:', req.user.email);
-    const userId = req.user.userId;
-    
-    // Find groups where user is a member or it's a public group
+    const userId = req.user._id;
+
     const groups = await Group.find({
-      $or: [
-        { 'members.userId': userId },
-        { isPublic: true }
-      ]
+      $or: [{ 'members.userId': userId }, { isPublic: true }],
     }).sort({ createdAt: -1 });
 
     console.log('✅ Groups found:', groups.length);
@@ -37,9 +33,8 @@ router.get('/groups/:id', auth, async (req, res) => {
       return res.status(404).json({ error: 'Group not found' });
     }
 
-    // Check if user is a member or admin
     const isMember = group.members.some(
-      m => m.userId.toString() === req.user.userId
+      (m) => m.userId.toString() === String(req.user._id),
     );
     const isAdmin = req.user.role === 'admin';
 
@@ -58,7 +53,7 @@ router.get('/groups/:id', auth, async (req, res) => {
 router.post('/groups', auth, async (req, res) => {
   try {
     console.log('📤 Creating group by:', req.user.email);
-    
+
     if (req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Only admins can create groups' });
     }
@@ -72,41 +67,59 @@ router.post('/groups', auth, async (req, res) => {
     let members = [];
 
     if (isPublic) {
-      // Add all users to the group
       const allUsers = await User.find({});
       console.log('📊 Adding all users:', allUsers.length);
-      members = allUsers.map(user => ({
+      members = allUsers.map((user) => ({
         userId: user._id,
         name: user.fullName || user.email,
-        role: user.role
+        role: user.role,
       }));
     } else if (memberIds && memberIds.length > 0) {
-      // Add selected users
       const users = await User.find({ _id: { $in: memberIds } });
-      members = users.map(user => ({
+      members = users.map((user) => ({
         userId: user._id,
         name: user.fullName || user.email,
-        role: user.role
+        role: user.role,
       }));
     }
 
-    // Always add creator
-    const creator = await User.findById(req.user.userId);
-    if (!members.some(m => m.userId.toString() === req.user.userId)) {
+    // dev fake admin id
+    const isDevFake =
+      process.env.NODE_ENV !== 'production' &&
+      String(req.user._id) === '000000000000000000000000';
+
+    let creator;
+
+    if (isDevFake) {
+      // in dev, synthesize a creator user without hitting DB
+      creator = {
+        _id: req.user._id,
+        fullName: req.user.fullName || 'Admin User',
+        email: req.user.email || 'admin@gmail.com',
+        role: req.user.role || 'admin',
+      };
+    } else {
+      creator = await User.findById(req.user._id);
+      if (!creator) {
+        return res.status(400).json({ error: 'Creator user not found' });
+      }
+    }
+
+    if (!members.some((m) => m.userId.toString() === String(req.user._id))) {
       members.push({
         userId: creator._id,
         name: creator.fullName || creator.email,
-        role: creator.role
+        role: creator.role,
       });
     }
 
     const group = new Group({
       name,
       description: description || '',
-      createdBy: req.user.userId,
+      createdBy: req.user._id,
       members,
       facultyManagers: facultyManagerIds || [],
-      isPublic: isPublic || false
+      isPublic: !!isPublic,
     });
 
     await group.save();
@@ -114,7 +127,7 @@ router.post('/groups', auth, async (req, res) => {
     console.log('✅ Group created:', group.name, 'with', members.length, 'members');
     res.status(201).json({
       message: 'Group created successfully',
-      group
+      group,
     });
   } catch (error) {
     console.error('❌ Error creating group:', error);
@@ -122,7 +135,7 @@ router.post('/groups', auth, async (req, res) => {
   }
 });
 
-// Send message in group - FIXED VERSION
+// Send message in group
 router.post('/groups/:id/messages', auth, upload.single('file'), async (req, res) => {
   try {
     console.log('📤 Sending message in group:', req.params.id);
@@ -142,9 +155,8 @@ router.post('/groups/:id/messages', auth, upload.single('file'), async (req, res
     console.log('✅ Group found:', group.name);
     console.log('👥 Members:', group.members.length);
 
-    // Check if user is a member
     const isMember = group.members.some(
-      m => m.userId && m.userId.toString() === req.user.userId
+      (m) => m.userId && m.userId.toString() === String(req.user._id),
     );
 
     console.log('🔍 Is member:', isMember);
@@ -156,22 +168,21 @@ router.post('/groups/:id/messages', auth, upload.single('file'), async (req, res
       return res.status(403).json({ error: 'You are not a member of this group' });
     }
 
-    // If public group and user not in members, add them
     if (group.isPublic && !isMember) {
       console.log('➕ Adding user to public group');
       group.members.push({
-        userId: req.user.userId,
+        userId: req.user._id,
         name: req.user.fullName || req.user.email,
-        role: req.user.role
+        role: req.user.role,
       });
     }
 
     const newMessage = {
-      senderId: req.user.userId,
+      senderId: req.user._id,
       senderName: req.user.fullName || req.user.email || 'User',
       senderRole: req.user.role || 'student',
       message: message || '',
-      replyTo: replyTo || null
+      replyTo: replyTo || null,
     };
 
     if (req.file) {
@@ -188,7 +199,7 @@ router.post('/groups/:id/messages', auth, upload.single('file'), async (req, res
     console.log('✅ Message sent successfully!');
     res.status(201).json({
       message: 'Message sent successfully',
-      group
+      group,
     });
   } catch (error) {
     console.error('❌ Error sending message:', error);
@@ -219,16 +230,16 @@ router.post('/groups/:id/members', auth, async (req, res) => {
     }
 
     const users = await User.find({ _id: { $in: memberIds } });
-    
-    users.forEach(user => {
+
+    users.forEach((user) => {
       const exists = group.members.some(
-        m => m.userId.toString() === user._id.toString()
+        (m) => m.userId.toString() === user._id.toString(),
       );
       if (!exists) {
         group.members.push({
           userId: user._id,
           name: user.fullName || user.email,
-          role: user.role
+          role: user.role,
         });
       }
     });
@@ -236,7 +247,7 @@ router.post('/groups/:id/members', auth, async (req, res) => {
     await group.save();
     res.json({
       message: 'Members added successfully',
-      group
+      group,
     });
   } catch (error) {
     console.error('❌ Error adding members:', error);
@@ -256,8 +267,7 @@ router.delete('/groups/:id', auth, async (req, res) => {
       return res.status(404).json({ error: 'Group not found' });
     }
 
-    // Delete all chat files
-    group.messages.forEach(msg => {
+    group.messages.forEach((msg) => {
       if (msg.fileUrl) {
         const filePath = path.join(__dirname, '..', msg.fileUrl);
         if (fs.existsSync(filePath)) {

@@ -88,7 +88,7 @@ const AdminChat = () => {
       const response = await apiClient.get("/chat/groups");
       console.log("✅ Groups fetched:", response.data);
       setGroups(response.data);
-      
+
       // Select first group by default
       if (response.data.length > 0 && !selectedGroup) {
         setSelectedGroup(response.data[0]);
@@ -115,7 +115,7 @@ const AdminChat = () => {
   useEffect(() => {
     fetchGroups();
     fetchUsers();
-    
+
     // Poll for new messages every 3 seconds
     const interval = setInterval(() => {
       if (selectedGroup) {
@@ -146,12 +146,20 @@ const AdminChat = () => {
     try {
       console.log("📤 Creating group:", groupForm);
 
-      const response = await apiClient.post("/chat/groups", {
-        name: groupForm.name,
-        description: groupForm.description,
-        memberIds: groupForm.selectedMembers,
-        isPublic: groupForm.isPublic,
-      });
+      const response = await apiClient.post(
+        "/chat/groups",
+        {
+          name: groupForm.name,
+          description: groupForm.description,
+          memberIds: groupForm.selectedMembers,
+          isPublic: groupForm.isPublic,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       console.log("✅ Group created:", response.data);
       toast.success("Group created successfully!");
@@ -195,8 +203,7 @@ const AdminChat = () => {
       setMessageText("");
       setSelectedFile(null);
       fetchGroups();
-      
-      // Update selected group
+
       const updatedGroup = response.data.group;
       setSelectedGroup(updatedGroup);
     } catch (error: any) {
@@ -241,11 +248,11 @@ const AdminChat = () => {
 
   // Toggle member selection
   const toggleMemberSelection = (userId: string) => {
-    setGroupForm(prev => ({
+    setGroupForm((prev) => ({
       ...prev,
       selectedMembers: prev.selectedMembers.includes(userId)
-        ? prev.selectedMembers.filter(id => id !== userId)
-        : [...prev.selectedMembers, userId]
+        ? prev.selectedMembers.filter((id) => id !== userId)
+        : [...prev.selectedMembers, userId],
     }));
   };
 
@@ -465,7 +472,9 @@ const AdminChat = () => {
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {selectedGroup.messages.length === 0 ? (
                   <div className="flex items-center justify-center h-full">
-                    <p className="text-muted-foreground">No messages yet. Start the conversation!</p>
+                    <p className="text-muted-foreground">
+                      No messages yet. Start the conversation!
+                    </p>
                   </div>
                 ) : (
                   selectedGroup.messages.map((msg) => {
