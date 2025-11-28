@@ -11,7 +11,8 @@ import {
   GraduationCap,
   ClipboardList,
   Bot,
-  Award // ✅ NEW: For Alumni icon
+  Award,
+  HandshakeIcon
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -64,12 +65,15 @@ const navigationConfig = {
     { title: "Calendar", icon: Calendar, url: "/student/calendar" },
     { title: "Chat", icon: MessageSquare, url: "/student/chat" },
     { title: "AI Chatbot", icon: Bot, url: "/student/chatbot" },
+    { title: "Alumni Directory", icon: Users, url: "/student/alumni-directory" },
+    { title: "My Mentorship", icon: HandshakeIcon, url: "/student/mentorship-requests" },
+    { title: "Communities", icon: MessageSquare, url: "/student/communities" }, // ✅ NEW
   ],
-  // ✅ NEW: Alumni Navigation
   alumni: [
     { title: "Dashboard", icon: LayoutDashboard, url: "/alumni/dashboard" },
     { title: "Alumni Directory", icon: Users, url: "/alumni/directory" },
     { title: "Communities", icon: MessageSquare, url: "/alumni/communities" },
+    { title: "Mentorship Requests", icon: HandshakeIcon, url: "/alumni/mentorship-requests" },
   ],
 };
 

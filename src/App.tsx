@@ -40,16 +40,20 @@ import StudentAssignments from "./pages/student/StudentAssignments";
 import StudentCalendar from "./pages/student/StudentCalendar";
 import StudentChat from "./pages/student/StudentChat";
 import StudentSettings from "./pages/student/StudentSettings";
+import StudentAlumniDirectory from "./pages/student/StudentAlumniDirectory";
+import StudentMentorshipRequests from "./pages/student/StudentMentorshipRequests";
+import StudentCommunities from "./pages/student/StudentCommunities"; // ✅ NEW
 
-// ✅ Alumni pages
+// Alumni pages
 import AlumniDashboard from "./pages/alumni/AlumniDashboard";
 import AlumniProfile from "./pages/alumni/AlumniProfile";
 import AlumniDirectory from "./pages/alumni/AlumniDirectory";
-import AlumniCommunities from "./pages/alumni/AlumniCommunities"; // ✅ NEW
+import AlumniCommunities from "./pages/alumni/AlumniCommunities";
+import AlumniMentorshipRequests from "./pages/alumni/AlumniMentorshipRequests";
 
 const queryClient = new QueryClient();
 
-// ✅ Protected Route Component
+// Protected Route Component
 const ProtectedRoute = ({ 
   children, 
   allowedRole 
@@ -330,8 +334,33 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } 
       />
+      <Route 
+        path="/student/alumni-directory" 
+        element={
+          <ProtectedRoute allowedRole="student">
+            <StudentAlumniDirectory />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/student/mentorship-requests" 
+        element={
+          <ProtectedRoute allowedRole="student">
+            <StudentMentorshipRequests />
+          </ProtectedRoute>
+        } 
+      />
+      {/* ✅ NEW: Student Communities Route */}
+      <Route 
+        path="/student/communities" 
+        element={
+          <ProtectedRoute allowedRole="student">
+            <StudentCommunities />
+          </ProtectedRoute>
+        } 
+      />
 
-      {/* ✅ Alumni Routes */}
+      {/* Alumni Routes */}
       <Route 
         path="/alumni/dashboard" 
         element={
@@ -361,6 +390,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRole="alumni">
             <AlumniCommunities />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/alumni/mentorship-requests" 
+        element={
+          <ProtectedRoute allowedRole="alumni">
+            <AlumniMentorshipRequests />
           </ProtectedRoute>
         } 
       />
