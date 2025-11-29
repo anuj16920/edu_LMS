@@ -1,63 +1,109 @@
+import { useState, useMemo } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar as CalendarIcon, Plus, Clock, FileText, ClipboardList, Video } from "lucide-react";
-import { useState } from "react";
+import {
+  Calendar as CalendarIcon,
+  Plus,
+  Clock,
+  FileText,
+  ClipboardList,
+  Video,
+} from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-
-const eventData = [
-  { id: 1, title: "Data Structures Midterm", type: "test", date: "2024-12-28", time: "10:00 AM", course: "CS 201", color: "from-primary to-cyan-glow" },
-  { id: 2, title: "Binary Tree Assignment Due", type: "assignment", date: "2024-12-30", time: "11:59 PM", course: "CS 201", color: "from-accent to-primary" },
-  { id: 3, title: "Web Dev Tutorial Upload", type: "tutorial", date: "2024-12-25", time: "2:00 PM", course: "CS 202", color: "from-cyan-glow to-accent" },
-  { id: 4, title: "Algorithms Quiz", type: "test", date: "2024-12-27", time: "11:00 AM", course: "CS 301", color: "from-primary to-accent" },
-  { id: 5, title: "Database Project Deadline", type: "assignment", date: "2025-01-05", time: "11:59 PM", course: "CS 203", color: "from-accent to-primary" },
-];
+import { useCalendarEvents, CalendarEvent } from "@/hooks/useCalendarEvents";
 
 const AdminCalendar = () => {
   const { toast } = useToast();
   const [viewMode, setViewMode] = useState<"month" | "week" | "day">("month");
-  const [events, setEvents] = useState(eventData);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const { data: events = [], refetch } = useCalendarEvents(currentMonth);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newEvent, setNewEvent] = useState({
-    title: "", type: "test", date: "", time: "", course: ""
+    title: "",
+    type: "test",
+    date: "",
+    time: "",
+    course: "",
+    description: "",
   });
 
-  const handleAddEvent = () => {
-    if (!newEvent.title || !newEvent.date || !newEvent.time || !newEvent.course) {
-      toast({ title: "Error", description: "All fields are required", variant: "destructive" });
-      return;
-    }
-    const colorMap: { [key: string]: string } = {
-      test: "from-primary to-cyan-glow",
-      assignment: "from-accent to-primary",
-      tutorial: "from-cyan-glow to-accent"
-    };
-    const event = {
-      id: events.length + 1,
-      title: newEvent.title,
-      type: newEvent.type,
-      date: newEvent.date,
-      time: newEvent.time,
-      course: newEvent.course,
-      color: colorMap[newEvent.type] || "from-primary to-accent"
-    };
-    setEvents([...events, event]);
-    setNewEvent({ title: "", type: "test", date: "", time: "", course: "" });
-    setDialogOpen(false);
-    toast({ title: "Success!", description: "Event added to calendar" });
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const eventsByDate = useMemo(() => {
+    const map: Record<string, CalendarEvent[]> = {};
+    events.forEach((e) => {
+      if (!map[e.date]) map[e.date] = [];
+      map[e.date].push(e);
+    });
+    return map;
+  }, [events]);
+
+  const changeMonth = (offset: number) => {
+    const d = new Date(year, month + offset, 1);
+    setCurrentMonth(d);
   };
 
   const getEventIcon = (type: string) => {
     switch (type) {
-      case "test": return FileText;
-      case "assignment": return ClipboardList;
-      case "tutorial": return Video;
-      default: return CalendarIcon;
+      case "test":
+        return FileText;
+      case "assignment":
+        return ClipboardList;
+      case "tutorial":
+        return Video;
+      default:
+        return CalendarIcon;
+    }
+  };
+
+  const handleAddEvent = async () => {
+    if (!newEvent.title || !newEvent.date || !newEvent.time || !newEvent.course) {
+      toast({
+        title: "Error",
+        description: "All fields are required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await fetch("/api/calendar/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newEvent.title,
+          type: newEvent.type,
+          date: newEvent.date,
+          time: newEvent.time,
+          description: newEvent.description,
+          location: newEvent.course,
+        }),
+      });
+      setNewEvent({
+        title: "",
+        type: "test",
+        date: "",
+        time: "",
+        course: "",
+        description: "",
+      });
+      setDialogOpen(false);
+      toast({ title: "Success", description: "Event added to calendar" });
+      refetch();
+    } catch {
+      toast({
+        title: "Error",
+        description: "Failed to add event",
+        variant: "destructive",
+      });
     }
   };
 
@@ -85,19 +131,23 @@ const AdminCalendar = () => {
               <div className="space-y-4">
                 <div>
                   <Label>Event Title</Label>
-                  <Input 
+                  <Input
                     placeholder="Midterm Exam..."
                     className="bg-secondary/30 border-border/50"
                     value={newEvent.title}
-                    onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
+                    onChange={(e) =>
+                      setNewEvent({ ...newEvent, title: e.target.value })
+                    }
                   />
                 </div>
                 <div>
                   <Label>Type</Label>
-                  <select 
+                  <select
                     className="w-full p-2 rounded-md bg-secondary/30 border border-border/50 text-foreground"
                     value={newEvent.type}
-                    onChange={(e) => setNewEvent({...newEvent, type: e.target.value})}
+                    onChange={(e) =>
+                      setNewEvent({ ...newEvent, type: e.target.value })
+                    }
                   >
                     <option value="test">Test</option>
                     <option value="assignment">Assignment</option>
@@ -107,33 +157,52 @@ const AdminCalendar = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label>Date</Label>
-                    <Input 
+                    <Input
                       type="date"
                       className="bg-secondary/30 border-border/50"
                       value={newEvent.date}
-                      onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
+                      onChange={(e) =>
+                        setNewEvent({ ...newEvent, date: e.target.value })
+                      }
                     />
                   </div>
                   <div>
                     <Label>Time</Label>
-                    <Input 
+                    <Input
                       type="time"
                       className="bg-secondary/30 border-border/50"
                       value={newEvent.time}
-                      onChange={(e) => setNewEvent({...newEvent, time: e.target.value})}
+                      onChange={(e) =>
+                        setNewEvent({ ...newEvent, time: e.target.value })
+                      }
                     />
                   </div>
                 </div>
                 <div>
-                  <Label>Course</Label>
-                  <Input 
+                  <Label>Course / Location</Label>
+                  <Input
                     placeholder="CS 201"
                     className="bg-secondary/30 border-border/50"
                     value={newEvent.course}
-                    onChange={(e) => setNewEvent({...newEvent, course: e.target.value})}
+                    onChange={(e) =>
+                      setNewEvent({ ...newEvent, course: e.target.value })
+                    }
                   />
                 </div>
-                <Button onClick={handleAddEvent} className="w-full bg-gradient-to-r from-primary to-cyan-glow">
+                <div>
+                  <Label>Description</Label>
+                  <Textarea
+                    className="bg-secondary/30 border-border/50"
+                    value={newEvent.description}
+                    onChange={(e) =>
+                      setNewEvent({ ...newEvent, description: e.target.value })
+                    }
+                  />
+                </div>
+                <Button
+                  onClick={handleAddEvent}
+                  className="w-full bg-gradient-to-r from-primary to-cyan-glow"
+                >
                   Add Event
                 </Button>
               </div>
@@ -142,24 +211,36 @@ const AdminCalendar = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button 
+          <Button
             variant={viewMode === "month" ? "default" : "outline"}
             onClick={() => setViewMode("month")}
-            className={viewMode === "month" ? "bg-gradient-to-r from-primary to-cyan-glow" : ""}
+            className={
+              viewMode === "month"
+                ? "bg-gradient-to-r from-primary to-cyan-glow"
+                : ""
+            }
           >
             Month
           </Button>
-          <Button 
+          <Button
             variant={viewMode === "week" ? "default" : "outline"}
             onClick={() => setViewMode("week")}
-            className={viewMode === "week" ? "bg-gradient-to-r from-primary to-cyan-glow" : ""}
+            className={
+              viewMode === "week"
+                ? "bg-gradient-to-r from-primary to-cyan-glow"
+                : ""
+            }
           >
             Week
           </Button>
-          <Button 
+          <Button
             variant={viewMode === "day" ? "default" : "outline"}
             onClick={() => setViewMode("day")}
-            className={viewMode === "day" ? "bg-gradient-to-r from-primary to-cyan-glow" : ""}
+            className={
+              viewMode === "day"
+                ? "bg-gradient-to-r from-primary to-cyan-glow"
+                : ""
+            }
           >
             Day
           </Button>
@@ -168,16 +249,28 @@ const AdminCalendar = () => {
         <div className="grid lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2 p-6 border-border/50 bg-card/50 backdrop-blur-sm">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-foreground">December 2024</h2>
+              <h2 className="text-2xl font-bold text-foreground">
+                {currentMonth.toLocaleString("default", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </h2>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm">Previous</Button>
-                <Button variant="outline" size="sm">Next</Button>
+                <Button variant="outline" size="sm" onClick={() => changeMonth(-1)}>
+                  Previous
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => changeMonth(1)}>
+                  Next
+                </Button>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-7 gap-2 mb-2">
               {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-                <div key={day} className="text-center text-sm font-semibold text-muted-foreground p-2">
+                <div
+                  key={day}
+                  className="text-center text-sm font-semibold text-muted-foreground p-2"
+                >
                   {day}
                 </div>
               ))}
@@ -185,23 +278,32 @@ const AdminCalendar = () => {
 
             <div className="grid grid-cols-7 gap-2">
               {Array.from({ length: 35 }, (_, i) => {
-                const day = i - 2;
-                const isCurrentMonth = day > 0 && day <= 31;
-                const hasEvent = isCurrentMonth && [25, 27, 28, 30].includes(day);
-                
+                const firstDayIndex = new Date(year, month, 1).getDay();
+                const day = i - firstDayIndex + 1;
+                const inMonth = day > 0 && day <= daysInMonth;
+                const dateKey = inMonth
+                  ? `${year}-${String(month + 1).padStart(2, "0")}-${String(
+                      day
+                    ).padStart(2, "0")}`
+                  : "";
+                const hasEvent =
+                  inMonth && (eventsByDate[dateKey]?.length || 0) > 0;
+
                 return (
                   <div
                     key={i}
                     className={`aspect-square p-2 rounded-lg border ${
-                      isCurrentMonth
+                      inMonth
                         ? hasEvent
                           ? "bg-primary/10 border-primary/30 hover:bg-primary/20 cursor-pointer"
                           : "bg-secondary/20 border-border/30 hover:bg-secondary/30 cursor-pointer"
                         : "bg-muted/10 border-transparent"
                     } transition-colors`}
                   >
-                    {isCurrentMonth && (
-                      <div className="text-sm font-medium text-foreground">{day}</div>
+                    {inMonth && (
+                      <div className="text-sm font-medium text-foreground">
+                        {day}
+                      </div>
                     )}
                     {hasEvent && (
                       <div className="mt-1">
@@ -228,14 +330,16 @@ const AdminCalendar = () => {
                     className="p-3 rounded-lg bg-secondary/30 border border-border/30 hover:border-primary/50 transition-colors"
                   >
                     <div className="flex items-start gap-3">
-                      <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${event.color} flex items-center justify-center flex-shrink-0`}>
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-cyan-glow flex items-center justify-center flex-shrink-0">
                         <Icon className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-foreground text-sm mb-1">{event.title}</h3>
+                        <h3 className="font-medium text-foreground text-sm mb-1">
+                          {event.title}
+                        </h3>
                         <div className="space-y-1">
-                          <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-xs">
-                            {event.course}
+                          <Badge className="bg-primary/10 text-primary border-primary/30 text-xs">
+                            {event.location || "Event"}
                           </Badge>
                           <p className="text-xs text-muted-foreground">
                             {event.date} • {event.time}
@@ -246,42 +350,11 @@ const AdminCalendar = () => {
                   </div>
                 );
               })}
-            </div>
-          </Card>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-4">
-          <Card className="p-4 border-border/50 bg-card/50 backdrop-blur-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-cyan-glow flex items-center justify-center">
-                <FileText className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">2</p>
-                <p className="text-sm text-muted-foreground">Upcoming Tests</p>
-              </div>
-            </div>
-          </Card>
-          <Card className="p-4 border-border/50 bg-card/50 backdrop-blur-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent to-primary flex items-center justify-center">
-                <ClipboardList className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">2</p>
-                <p className="text-sm text-muted-foreground">Due Assignments</p>
-              </div>
-            </div>
-          </Card>
-          <Card className="p-4 border-border/50 bg-card/50 backdrop-blur-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-glow to-accent flex items-center justify-center">
-                <Video className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">1</p>
-                <p className="text-sm text-muted-foreground">Tutorial Uploads</p>
-              </div>
+              {events.length === 0 && (
+                <p className="text-xs text-muted-foreground">
+                  No upcoming events.
+                </p>
+              )}
             </div>
           </Card>
         </div>

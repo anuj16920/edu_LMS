@@ -51,6 +51,7 @@ app.use('/api/communities', require('./routes/communities'));
 app.use('/api/mentorship', require('./routes/mentorship'));          // Mentorship routes
 app.use('/api/study-materials', require('./routes/studyMaterials')); // Study materials
 app.use('/api/admin/users', require('./routes/adminUsers'));         // admin user mgmt
+app.use('/api/calendar', require('./routes/calendar'));              // ✅ calendar events
 
 // Test Route
 app.get('/', (req, res) => {
@@ -75,6 +76,7 @@ app.get('/', (req, res) => {
       studyMaterials:
         '/api/study-materials (GET, POST, PUT, DELETE, /mine, /:id/download, /:id/like, /:id/status)',
       adminUsers: '/api/admin/users (GET, POST :id/ban, POST :id/unban)',
+      calendar: '/api/calendar/events (GET)', // ✅ calendar route info
     },
   });
 });
@@ -114,5 +116,7 @@ app.listen(PORT, () => {
   console.log(`🤝 Mentorship routes: http://localhost:${PORT}/api/mentorship`);
   console.log(`📚 Study material routes: http://localhost:${PORT}/api/study-materials`);
   console.log(`🛡️ Admin user routes: http://localhost:${PORT}/api/admin/users`);
+  console.log(`📅 Calendar routes: http://localhost:${PORT}/api/calendar/events`);
   console.log(`🔑 Google auth URL: http://localhost:${PORT}/api/auth/google/url`);
 });
+
