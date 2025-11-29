@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,58 +6,76 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/integrations/supabase/auth";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+
+// Eager load only Login and LoginSuccess
 import Login from "./pages/Login";
 import LoginSuccess from "./pages/LoginSuccess";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import FacultyDashboard from "./pages/faculty/FacultyDashboard";
-import StudentDashboard from "./pages/student/StudentDashboard";
-import NotFound from "./pages/NotFound";
 
-// Admin pages
-import FacultyManagement from "./pages/admin/FacultyManagement";
-import StudentManagement from "./pages/admin/StudentManagement";
-import TutorialManagement from "./pages/admin/TutorialManagement";
-import TestManagement from "./pages/admin/TestManagement";
-import AssignmentManagement from "./pages/admin/AssignmentManagement";
-import AdminCalendar from "./pages/admin/AdminCalendar";
-import AdminChat from "./pages/admin/AdminChat";
-import AdminProfile from "./pages/admin/AdminProfile";
-import AdminSettings from "./pages/admin/AdminSettings";
-import AdminMaterialManagement from "./pages/admin/AdminMaterialManagement";
-import AdminUserManagement from "./pages/admin/AdminUserManagement";
+// Lazy load all dashboard pages
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const FacultyDashboard = lazy(() => import("./pages/faculty/FacultyDashboard"));
+const StudentDashboard = lazy(() => import("./pages/student/StudentDashboard"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
-// Faculty pages
-import FacultyTutorials from "./pages/faculty/FacultyTutorials";
-import FacultyProfile from "./pages/faculty/FacultyProfile";
-import FacultyTests from "./pages/faculty/FacultyTests";
-import FacultyAssignments from "./pages/faculty/FacultyAssignments";
-import FacultyCalendar from "./pages/faculty/FacultyCalendar";
-import FacultyChat from "./pages/faculty/FacultyChat";
-import FacultySettings from "./pages/faculty/FacultySettings";
-import FacultyMaterials from "./pages/faculty/FacultyMaterials";
+// Admin pages - lazy loaded
+const FacultyManagement = lazy(() => import("./pages/admin/FacultyManagement"));
+const StudentManagement = lazy(() => import("./pages/admin/StudentManagement"));
+const TutorialManagement = lazy(() => import("./pages/admin/TutorialManagement"));
+const TestManagement = lazy(() => import("./pages/admin/TestManagement"));
+const AssignmentManagement = lazy(() => import("./pages/admin/AssignmentManagement"));
+const AdminCalendar = lazy(() => import("./pages/admin/AdminCalendar"));
+const AdminChat = lazy(() => import("./pages/admin/AdminChat"));
+const AdminProfile = lazy(() => import("./pages/admin/AdminProfile"));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
+const AdminMaterialManagement = lazy(() => import("./pages/admin/AdminMaterialManagement"));
+const AdminUserManagement = lazy(() => import("./pages/admin/AdminUserManagement"));
 
-// Student pages
-import StudentTutorials from "./pages/student/StudentTutorials";
-import StudentChatbot from "./pages/student/StudentChatbot";
-import StudentProfile from "./pages/student/StudentProfile";
-import StudentTests from "./pages/student/StudentTests";
-import StudentAssignments from "./pages/student/StudentAssignments";
-import StudentCalendar from "./pages/student/StudentCalendar";
-import StudentChat from "./pages/student/StudentChat";
-import StudentSettings from "./pages/student/StudentSettings";
-import StudentAlumniDirectory from "./pages/student/StudentAlumniDirectory";
-import StudentMentorshipRequests from "./pages/student/StudentMentorshipRequests";
-import StudentCommunities from "./pages/student/StudentCommunities";
-import StudentMaterials from "./pages/student/StudentMaterials";
+// Faculty pages - lazy loaded
+const FacultyTutorials = lazy(() => import("./pages/faculty/FacultyTutorials"));
+const FacultyProfile = lazy(() => import("./pages/faculty/FacultyProfile"));
+const FacultyTests = lazy(() => import("./pages/faculty/FacultyTests"));
+const FacultyAssignments = lazy(() => import("./pages/faculty/FacultyAssignments"));
+const FacultyCalendar = lazy(() => import("./pages/faculty/FacultyCalendar"));
+const FacultyChat = lazy(() => import("./pages/faculty/FacultyChat"));
+const FacultySettings = lazy(() => import("./pages/faculty/FacultySettings"));
+const FacultyMaterials = lazy(() => import("./pages/faculty/FacultyMaterials"));
 
-// Alumni pages
-import AlumniDashboard from "./pages/alumni/AlumniDashboard";
-import AlumniProfile from "./pages/alumni/AlumniProfile";
-import AlumniDirectory from "./pages/alumni/AlumniDirectory";
-import AlumniCommunities from "./pages/alumni/AlumniCommunities";
-import AlumniMentorshipRequests from "./pages/alumni/AlumniMentorshipRequests";
+// Student pages - lazy loaded
+const StudentTutorials = lazy(() => import("./pages/student/StudentTutorials"));
+const StudentChatbot = lazy(() => import("./pages/student/StudentChatbot"));
+const StudentProfile = lazy(() => import("./pages/student/StudentProfile"));
+const StudentTests = lazy(() => import("./pages/student/StudentTests"));
+const StudentAssignments = lazy(() => import("./pages/student/StudentAssignments"));
+const StudentCalendar = lazy(() => import("./pages/student/StudentCalendar"));
+const StudentChat = lazy(() => import("./pages/student/StudentChat"));
+const StudentSettings = lazy(() => import("./pages/student/StudentSettings"));
+const StudentAlumniDirectory = lazy(() => import("./pages/student/StudentAlumniDirectory"));
+const StudentMentorshipRequests = lazy(() => import("./pages/student/StudentMentorshipRequests"));
+const StudentCommunities = lazy(() => import("./pages/student/StudentCommunities"));
+const StudentMaterials = lazy(() => import("./pages/student/StudentMaterials"));
 
-const queryClient = new QueryClient();
+// Alumni pages - lazy loaded
+const AlumniDashboard = lazy(() => import("./pages/alumni/AlumniDashboard"));
+const AlumniProfile = lazy(() => import("./pages/alumni/AlumniProfile"));
+const AlumniDirectory = lazy(() => import("./pages/alumni/AlumniDirectory"));
+const AlumniCommunities = lazy(() => import("./pages/alumni/AlumniCommunities"));
+const AlumniMentorshipRequests = lazy(() => import("./pages/alumni/AlumniMentorshipRequests"));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60000, // 1 minute
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-premium-black via-background to-deep-navy">
+    <div className="text-xl text-white animate-pulse">Loading...</div>
+  </div>
+);
 
 // Protected Route Component
 const ProtectedRoute = ({
@@ -69,11 +88,7 @@ const ProtectedRoute = ({
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl">Loading...</div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (!user) {
@@ -92,11 +107,7 @@ const AppRoutes = () => {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl">Loading...</div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   return (
@@ -123,7 +134,9 @@ const AppRoutes = () => {
         path="/admin/dashboard"
         element={
           <ProtectedRoute allowedRole="admin">
-            <AdminDashboard />
+            <Suspense fallback={<PageLoader />}>
+              <AdminDashboard />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -131,7 +144,9 @@ const AppRoutes = () => {
         path="/admin/faculty"
         element={
           <ProtectedRoute allowedRole="admin">
-            <FacultyManagement />
+            <Suspense fallback={<PageLoader />}>
+              <FacultyManagement />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -139,7 +154,9 @@ const AppRoutes = () => {
         path="/admin/students"
         element={
           <ProtectedRoute allowedRole="admin">
-            <StudentManagement />
+            <Suspense fallback={<PageLoader />}>
+              <StudentManagement />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -147,7 +164,9 @@ const AppRoutes = () => {
         path="/admin/tutorials"
         element={
           <ProtectedRoute allowedRole="admin">
-            <TutorialManagement />
+            <Suspense fallback={<PageLoader />}>
+              <TutorialManagement />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -155,7 +174,9 @@ const AppRoutes = () => {
         path="/admin/materials"
         element={
           <ProtectedRoute allowedRole="admin">
-            <AdminMaterialManagement />
+            <Suspense fallback={<PageLoader />}>
+              <AdminMaterialManagement />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -163,7 +184,9 @@ const AppRoutes = () => {
         path="/admin/tests"
         element={
           <ProtectedRoute allowedRole="admin">
-            <TestManagement />
+            <Suspense fallback={<PageLoader />}>
+              <TestManagement />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -171,7 +194,9 @@ const AppRoutes = () => {
         path="/admin/assignments"
         element={
           <ProtectedRoute allowedRole="admin">
-            <AssignmentManagement />
+            <Suspense fallback={<PageLoader />}>
+              <AssignmentManagement />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -179,7 +204,9 @@ const AppRoutes = () => {
         path="/admin/calendar"
         element={
           <ProtectedRoute allowedRole="admin">
-            <AdminCalendar />
+            <Suspense fallback={<PageLoader />}>
+              <AdminCalendar />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -187,7 +214,9 @@ const AppRoutes = () => {
         path="/admin/chat"
         element={
           <ProtectedRoute allowedRole="admin">
-            <AdminChat />
+            <Suspense fallback={<PageLoader />}>
+              <AdminChat />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -195,7 +224,9 @@ const AppRoutes = () => {
         path="/admin/profile"
         element={
           <ProtectedRoute allowedRole="admin">
-            <AdminProfile />
+            <Suspense fallback={<PageLoader />}>
+              <AdminProfile />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -203,7 +234,9 @@ const AppRoutes = () => {
         path="/admin/settings"
         element={
           <ProtectedRoute allowedRole="admin">
-            <AdminSettings />
+            <Suspense fallback={<PageLoader />}>
+              <AdminSettings />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -211,7 +244,9 @@ const AppRoutes = () => {
         path="/admin/users"
         element={
           <ProtectedRoute allowedRole="admin">
-            <AdminUserManagement />
+            <Suspense fallback={<PageLoader />}>
+              <AdminUserManagement />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -221,7 +256,9 @@ const AppRoutes = () => {
         path="/faculty/dashboard"
         element={
           <ProtectedRoute allowedRole="faculty">
-            <FacultyDashboard />
+            <Suspense fallback={<PageLoader />}>
+              <FacultyDashboard />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -229,7 +266,9 @@ const AppRoutes = () => {
         path="/faculty/tutorials"
         element={
           <ProtectedRoute allowedRole="faculty">
-            <FacultyTutorials />
+            <Suspense fallback={<PageLoader />}>
+              <FacultyTutorials />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -237,7 +276,9 @@ const AppRoutes = () => {
         path="/faculty/materials"
         element={
           <ProtectedRoute allowedRole="faculty">
-            <FacultyMaterials />
+            <Suspense fallback={<PageLoader />}>
+              <FacultyMaterials />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -245,7 +286,9 @@ const AppRoutes = () => {
         path="/faculty/tests"
         element={
           <ProtectedRoute allowedRole="faculty">
-            <FacultyTests />
+            <Suspense fallback={<PageLoader />}>
+              <FacultyTests />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -253,7 +296,9 @@ const AppRoutes = () => {
         path="/faculty/assignments"
         element={
           <ProtectedRoute allowedRole="faculty">
-            <FacultyAssignments />
+            <Suspense fallback={<PageLoader />}>
+              <FacultyAssignments />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -261,7 +306,9 @@ const AppRoutes = () => {
         path="/faculty/calendar"
         element={
           <ProtectedRoute allowedRole="faculty">
-            <FacultyCalendar />
+            <Suspense fallback={<PageLoader />}>
+              <FacultyCalendar />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -269,7 +316,9 @@ const AppRoutes = () => {
         path="/faculty/chat"
         element={
           <ProtectedRoute allowedRole="faculty">
-            <FacultyChat />
+            <Suspense fallback={<PageLoader />}>
+              <FacultyChat />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -277,7 +326,9 @@ const AppRoutes = () => {
         path="/faculty/profile"
         element={
           <ProtectedRoute allowedRole="faculty">
-            <FacultyProfile />
+            <Suspense fallback={<PageLoader />}>
+              <FacultyProfile />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -285,7 +336,9 @@ const AppRoutes = () => {
         path="/faculty/settings"
         element={
           <ProtectedRoute allowedRole="faculty">
-            <FacultySettings />
+            <Suspense fallback={<PageLoader />}>
+              <FacultySettings />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -295,7 +348,9 @@ const AppRoutes = () => {
         path="/student/dashboard"
         element={
           <ProtectedRoute allowedRole="student">
-            <StudentDashboard />
+            <Suspense fallback={<PageLoader />}>
+              <StudentDashboard />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -303,7 +358,9 @@ const AppRoutes = () => {
         path="/student/tutorials"
         element={
           <ProtectedRoute allowedRole="student">
-            <StudentTutorials />
+            <Suspense fallback={<PageLoader />}>
+              <StudentTutorials />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -311,7 +368,9 @@ const AppRoutes = () => {
         path="/student/materials"
         element={
           <ProtectedRoute allowedRole="student">
-            <StudentMaterials />
+            <Suspense fallback={<PageLoader />}>
+              <StudentMaterials />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -319,7 +378,9 @@ const AppRoutes = () => {
         path="/student/tests"
         element={
           <ProtectedRoute allowedRole="student">
-            <StudentTests />
+            <Suspense fallback={<PageLoader />}>
+              <StudentTests />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -327,7 +388,9 @@ const AppRoutes = () => {
         path="/student/assignments"
         element={
           <ProtectedRoute allowedRole="student">
-            <StudentAssignments />
+            <Suspense fallback={<PageLoader />}>
+              <StudentAssignments />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -335,7 +398,9 @@ const AppRoutes = () => {
         path="/student/calendar"
         element={
           <ProtectedRoute allowedRole="student">
-            <StudentCalendar />
+            <Suspense fallback={<PageLoader />}>
+              <StudentCalendar />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -343,7 +408,9 @@ const AppRoutes = () => {
         path="/student/chat"
         element={
           <ProtectedRoute allowedRole="student">
-            <StudentChat />
+            <Suspense fallback={<PageLoader />}>
+              <StudentChat />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -351,7 +418,9 @@ const AppRoutes = () => {
         path="/student/chatbot"
         element={
           <ProtectedRoute allowedRole="student">
-            <StudentChatbot />
+            <Suspense fallback={<PageLoader />}>
+              <StudentChatbot />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -359,7 +428,9 @@ const AppRoutes = () => {
         path="/student/profile"
         element={
           <ProtectedRoute allowedRole="student">
-            <StudentProfile />
+            <Suspense fallback={<PageLoader />}>
+              <StudentProfile />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -367,7 +438,9 @@ const AppRoutes = () => {
         path="/student/settings"
         element={
           <ProtectedRoute allowedRole="student">
-            <StudentSettings />
+            <Suspense fallback={<PageLoader />}>
+              <StudentSettings />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -375,7 +448,9 @@ const AppRoutes = () => {
         path="/student/alumni-directory"
         element={
           <ProtectedRoute allowedRole="student">
-            <StudentAlumniDirectory />
+            <Suspense fallback={<PageLoader />}>
+              <StudentAlumniDirectory />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -383,7 +458,9 @@ const AppRoutes = () => {
         path="/student/mentorship-requests"
         element={
           <ProtectedRoute allowedRole="student">
-            <StudentMentorshipRequests />
+            <Suspense fallback={<PageLoader />}>
+              <StudentMentorshipRequests />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -391,7 +468,9 @@ const AppRoutes = () => {
         path="/student/communities"
         element={
           <ProtectedRoute allowedRole="student">
-            <StudentCommunities />
+            <Suspense fallback={<PageLoader />}>
+              <StudentCommunities />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -401,7 +480,9 @@ const AppRoutes = () => {
         path="/alumni/dashboard"
         element={
           <ProtectedRoute allowedRole="alumni">
-            <AlumniDashboard />
+            <Suspense fallback={<PageLoader />}>
+              <AlumniDashboard />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -409,7 +490,9 @@ const AppRoutes = () => {
         path="/alumni/profile"
         element={
           <ProtectedRoute allowedRole="alumni">
-            <AlumniProfile />
+            <Suspense fallback={<PageLoader />}>
+              <AlumniProfile />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -417,7 +500,9 @@ const AppRoutes = () => {
         path="/alumni/directory"
         element={
           <ProtectedRoute allowedRole="alumni">
-            <AlumniDirectory />
+            <Suspense fallback={<PageLoader />}>
+              <AlumniDirectory />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -425,7 +510,9 @@ const AppRoutes = () => {
         path="/alumni/communities"
         element={
           <ProtectedRoute allowedRole="alumni">
-            <AlumniCommunities />
+            <Suspense fallback={<PageLoader />}>
+              <AlumniCommunities />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -433,12 +520,21 @@ const AppRoutes = () => {
         path="/alumni/mentorship-requests"
         element={
           <ProtectedRoute allowedRole="alumni">
-            <AlumniMentorshipRequests />
+            <Suspense fallback={<PageLoader />}>
+              <AlumniMentorshipRequests />
+            </Suspense>
           </ProtectedRoute>
         }
       />
 
-      <Route path="*" element={<NotFound />} />
+      <Route
+        path="*"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <NotFound />
+          </Suspense>
+        }
+      />
     </Routes>
   );
 };
