@@ -21,18 +21,12 @@ export default defineConfig({
     outDir: "dist",
     sourcemap: false,
     assetsDir: "assets",
-    cssCodeSplit: true,
+    cssCodeSplit: false,
     rollupOptions: {
       output: {
         manualChunks: undefined,
-        assetFileNames: (assetInfo) => {
-          if (assetInfo.name && assetInfo.name.endsWith('.css')) {
-            return 'assets/[name]-[hash][extname]';
-          }
-          return 'assets/[name]-[hash][extname]';
-        },
       },
     },
   },
-  base: "./",
+  base: "/",  // ← CHANGED FROM "./" TO "/"
 });
