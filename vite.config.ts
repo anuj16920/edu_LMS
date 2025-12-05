@@ -14,13 +14,23 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  css: {
+    postcss: './postcss.config.js',
+  },
   build: {
     outDir: "dist",
     sourcemap: false,
     assetsDir: "assets",
+    cssCodeSplit: true,
     rollupOptions: {
       output: {
         manualChunks: undefined,
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name && assetInfo.name.endsWith('.css')) {
+            return 'assets/[name]-[hash][extname]';
+          }
+          return 'assets/[name]-[hash][extname]';
+        },
       },
     },
   },
