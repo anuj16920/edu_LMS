@@ -15,6 +15,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'http://localhost:8080',
+  process.env.FRONTEND_URL || 'https://your-project.vercel.app', // Add your Vercel URL after deployment
 ];
 
 app.use(
@@ -48,17 +49,18 @@ app.use('/api/chat', require('./routes/chat'));
 app.use('/api/chatbot', require('./routes/chatbot'));
 app.use('/api/alumni', require('./routes/alumni'));
 app.use('/api/communities', require('./routes/communities'));
-app.use('/api/mentorship', require('./routes/mentorship'));          // Mentorship routes
-app.use('/api/study-materials', require('./routes/studyMaterials')); // Study materials
-app.use('/api/admin/users', require('./routes/adminUsers'));         // admin user mgmt
-app.use('/api/calendar', require('./routes/calendar'));              // ✅ calendar events
+app.use('/api/mentorship', require('./routes/mentorship'));
+app.use('/api/study-materials', require('./routes/studyMaterials'));
+app.use('/api/admin/users', require('./routes/adminUsers'));
+app.use('/api/calendar', require('./routes/calendar'));
 
 // Test Route
 app.get('/', (req, res) => {
   res.json({
-    message: '✅ Education Portal Backend is Running!',
+    message: '✅ MLRIT Education Portal Backend is Running!',
     database: 'MongoDB Connected',
     status: 'Active',
+    environment: process.env.NODE_ENV || 'development',
     routes: {
       auth: '/api/auth/register, /api/auth/login, /api/auth/google/url, /api/auth/google/callback',
       faculty: '/api/faculty (GET, POST, PUT, DELETE)',
@@ -76,7 +78,7 @@ app.get('/', (req, res) => {
       studyMaterials:
         '/api/study-materials (GET, POST, PUT, DELETE, /mine, /:id/download, /:id/like, /:id/status)',
       adminUsers: '/api/admin/users (GET, POST :id/ban, POST :id/unban)',
-      calendar: '/api/calendar/events (GET)', // ✅ calendar route info
+      calendar: '/api/calendar/events (GET)',
     },
   });
 });
@@ -98,25 +100,29 @@ app.get('/api/test-db', async (req, res) => {
   }
 });
 
-// Start Server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
-  console.log(`📍 URL: http://localhost:${PORT}`);
-  console.log(`🔐 Auth routes: http://localhost:${PORT}/api/auth`);
-  console.log(`👨‍🏫 Faculty routes: http://localhost:${PORT}/api/faculty`);
-  console.log(`🎓 Student routes: http://localhost:${PORT}/api/students`);
-  console.log(`📚 Tutorial routes: http://localhost:${PORT}/api/tutorials`);
-  console.log(`📝 Test routes: http://localhost:${PORT}/api/tests`);
-  console.log(`📋 Assignment routes: http://localhost:${PORT}/api/assignments`);
-  console.log(`💬 Chat routes: http://localhost:${PORT}/api/chat`);
-  console.log(`🤖 Chatbot routes: http://localhost:${PORT}/api/chatbot`);
-  console.log(`🎓 Alumni routes: http://localhost:${PORT}/api/alumni`);
-  console.log(`👥 Communities routes: http://localhost:${PORT}/api/communities`);
-  console.log(`🤝 Mentorship routes: http://localhost:${PORT}/api/mentorship`);
-  console.log(`📚 Study material routes: http://localhost:${PORT}/api/study-materials`);
-  console.log(`🛡️ Admin user routes: http://localhost:${PORT}/api/admin/users`);
-  console.log(`📅 Calendar routes: http://localhost:${PORT}/api/calendar/events`);
-  console.log(`🔑 Google auth URL: http://localhost:${PORT}/api/auth/google/url`);
-});
+// Export for Vercel serverless
+module.exports = app;
 
+// Only start server locally, not in production (Vercel handles this)
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Server is running on port ${PORT}`);
+    console.log(`📍 URL: http://localhost:${PORT}`);
+    console.log(`🔐 Auth routes: http://localhost:${PORT}/api/auth`);
+    console.log(`👨‍🏫 Faculty routes: http://localhost:${PORT}/api/faculty`);
+    console.log(`🎓 Student routes: http://localhost:${PORT}/api/students`);
+    console.log(`📚 Tutorial routes: http://localhost:${PORT}/api/tutorials`);
+    console.log(`📝 Test routes: http://localhost:${PORT}/api/tests`);
+    console.log(`📋 Assignment routes: http://localhost:${PORT}/api/assignments`);
+    console.log(`💬 Chat routes: http://localhost:${PORT}/api/chat`);
+    console.log(`🤖 Chatbot routes: http://localhost:${PORT}/api/chatbot`);
+    console.log(`🎓 Alumni routes: http://localhost:${PORT}/api/alumni`);
+    console.log(`👥 Communities routes: http://localhost:${PORT}/api/communities`);
+    console.log(`🤝 Mentorship routes: http://localhost:${PORT}/api/mentorship`);
+    console.log(`📚 Study material routes: http://localhost:${PORT}/api/study-materials`);
+    console.log(`🛡️ Admin user routes: http://localhost:${PORT}/api/admin/users`);
+    console.log(`📅 Calendar routes: http://localhost:${PORT}/api/calendar/events`);
+    console.log(`🔑 Google auth URL: http://localhost:${PORT}/api/auth/google/url`);
+  });
+}

@@ -8,6 +8,64 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+    /* Light Mode - Clean Professional Theme */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 189 94% 53%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 217 91% 60%;
+
+    --radius: 0.75rem;
+
+    /* Sidebar Light */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Custom Premium Colors - Light */
+    --neon-blue: 217 91% 60%;
+    --cyan-glow: 189 94% 53%;
+    --deep-navy: 210 100% 20%;
+    --premium-black: 210 100% 10%;
+
+    /* Glassmorphism - Light */
+    --glass-bg: 0 0% 100% / 0.7;
+    --glass-border: 210 40% 80% / 0.3;
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-spring: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .dark {
     /* Premium Dark Mode - Deep Navy & Black Theme */
     --background: 210 100% 3%;
     --foreground: 210 20% 90%;
@@ -37,8 +95,6 @@ All colors MUST be HSL.
     --input: 210 40% 12%;
     --ring: 217 91% 60%;
 
-    --radius: 0.75rem;
-
     /* Sidebar Premium Dark */
     --sidebar-background: 210 50% 5%;
     --sidebar-foreground: 210 20% 85%;
@@ -49,20 +105,15 @@ All colors MUST be HSL.
     --sidebar-border: 210 40% 12%;
     --sidebar-ring: 217 91% 60%;
 
-    /* Custom Premium Colors */
+    /* Custom Premium Colors - Dark */
     --neon-blue: 217 91% 60%;
     --cyan-glow: 189 94% 53%;
     --deep-navy: 210 100% 6%;
     --premium-black: 210 100% 2%;
 
-    /* Glassmorphism */
+    /* Glassmorphism - Dark */
     --glass-bg: 210 50% 8% / 0.7;
     --glass-border: 210 40% 20% / 0.3;
-
-    /* Animations */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    --transition-spring: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 }
 
