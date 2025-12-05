@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     host: "::",
     port: 8080,
-    open: true  // ✅ Add this to auto-open in default browser
+    open: true
   },
   plugins: [react()],
   resolve: {
@@ -14,4 +14,15 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    outDir: "dist",
+    sourcemap: false,
+    assetsDir: "assets",
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
+  },
+  base: "./",
 });
